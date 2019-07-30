@@ -3,8 +3,17 @@ python:
     - "2.6"
     - "3.6"
     - "3.7"
+#script: python tests/__ini__.py
+script:
+  - git clone https://github.com/mkeyno/KeynoRobot.git
+  
+branches:
+  only:
+    - master
 deploy:
   provider: pypi
   user: mkeyno
-  password:
-    secure: "Your encrypted password"
+  repository: KeynoRobot
+  token: "1f809f5d6cb379568bc960a377d7a16e347355d5"
+  dist: "python"
+ 

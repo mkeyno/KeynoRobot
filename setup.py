@@ -12,13 +12,13 @@ long_description = (HERE / "README.md").read_text()
 
 setuptools.setup(
     name="KeynoRobot",
-    version="0.0.1-edf01",
+    version='0.1.%s' % os.environ.get('TRAVIS_BUILD_NUMBER', 0),
     author="Mehrdad Keyno",
     author_email="hrsk1980@gmail.com",
-    description="A primilarly fuction to detect berries on the camera",
+    description="A preliminarily function to detect berries on the camera",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/mkeyno/Small-Raspberry-Picker-Robot/blob/master/firmware/OpenCV",
+    url="https://github.com/mkeyno/KeynoRobot",
     packages=setuptools.find_packages(exclude=("tests",)),
     install_requires=[
           'numpy',
