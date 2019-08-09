@@ -1,0 +1,514 @@
+git tag -a 0.0.1 -m "First pypi deployment"
+git add .
+git commit -m "add all file"
+git push origin master
+
+pip-review --local --interactive
+
+
+1f809f5d6cb379568bc960a377d7a16e347355d5
+ Types of learning algorithms
+
+4.1.1 Supervised learning
+4.1.2 Unsupervised learning
+4.1.3 Reinforcement learning
+4.1.4 Feature learning
+4.1.5 Sparse dictionary learning
+4.1.6 Anomaly detection
+4.1.7 Association rules
+
+ Models of Machine learning
+
+4.2.1 Artificial neural networks
+4.2.2 Decision trees
+4.2.3 Support vector machines
+4.2.4 Bayesian networks
+4.2.5 Genetic algorithms
+
+ machine learning methods
+	 Linear classifier
+	 K-Nearest Neighbors
+	 Boosted Stumps
+	 Non-linear classifier
+	 Support-vector machine (SVM)
+	 Deep neural network (DNN)
+	 Convolutional neural network (CNN)
+	 
+a[-1]    # last item in the array
+a[-2:]   # last two items in the array
+a[:-2]   # everything except the last two items	 
+a[::-1]    # all items in the array, reversed
+a[1::-1]   # the first two items, reversed
+a[:-3:-1]  # the last two items, reversed
+a[-3::-1]  # everything except the last two items, reversed	 
+
+a[slice(start, stop, step)]
+
+MyLib
+-__init__.py
+-File1.py
+-File1.py
+
+# Inside of __init__.py
+from MyLib.File1 import ClassA, ClassB, ClassC
+from MyLib.File2 import ClassX, ClassY, ClassZ
+
+/project/
+    /package/
+        __init__.py
+        module.py
+    setup.py
+
+├── setup.py
+├── src
+│   └── namespace
+│       └── mypackage
+│           ├── __init__.py
+│           └── mod1.py
+└── tests
+    └── test_mod1.py
+
+reader/
+│
+├── reader/
+│   ├── config.txt
+│   ├── feed.py
+│   ├── __init__.py
+│   ├── __main__.py
+│   └── viewer.py
+│
+├── tests/
+│   ├── test_feed.py
+│   └── test_viewer.py
+│
+├── MANIFEST.in
+├── README.md
+└── setup.py
+└── dist/
+    ├── realpython_reader-1.0.0-py3-none-any.whl
+    └── realpython-reader-1.0.0.tar.gz
+
+
+
+
+
+
+
+
+"""A setuptools based setup module.
+See:
+https://packaging.python.org/guides/distributing-packages-using-setuptools/
+https://github.com/pypa/sampleproject
+"""
+
+# Always prefer setuptools over distutils
+from setuptools import setup, find_packages
+from os import path
+# io.open is needed for projects that support Python 2.7
+# It ensures open() defaults to text mode with universal newlines,
+# and accepts an argument to specify the text encoding
+# Python 3 only projects can skip this import
+from io import open
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+# Arguments marked as "Required" below must be included for upload to PyPI.
+# Fields marked as "Optional" may be commented out.
+
+setup(
+    # This is the name of your project. The first time you publish this
+    # package, this name will be registered for you. It will determine how
+    # users can install this project, e.g.:
+    #
+    # $ pip install sampleproject
+    #
+    # And where it will live on PyPI: https://pypi.org/project/sampleproject/
+    #
+    # There are some restrictions on what makes a valid project name
+    # specification here:
+    # https://packaging.python.org/specifications/core-metadata/#name
+    name='sampleproject',  # Required
+
+    # Versions should comply with PEP 440:
+    # https://www.python.org/dev/peps/pep-0440/
+    #
+    # For a discussion on single-sourcing the version across setup.py and the
+    # project code, see
+    # https://packaging.python.org/en/latest/single_source_version.html
+    version='1.3.0',  # Required
+
+    # This is a one-line description or tagline of what your project does. This
+    # corresponds to the "Summary" metadata field:
+    # https://packaging.python.org/specifications/core-metadata/#summary
+    description='A sample Python project',  # Optional
+
+    # This is an optional longer description of your project that represents
+    # the body of text which users will see when they visit PyPI.
+    #
+    # Often, this is the same as your README, so you can just read it in from
+    # that file directly (as we have already done above)
+    #
+    # This field corresponds to the "Description" metadata field:
+    # https://packaging.python.org/specifications/core-metadata/#description-optional
+    long_description=long_description,  # Optional
+
+    # Denotes that our long_description is in Markdown; valid values are
+    # text/plain, text/x-rst, and text/markdown
+    #
+    # Optional if long_description is written in reStructuredText (rst) but
+    # required for plain-text or Markdown; if unspecified, "applications should
+    # attempt to render [the long_description] as text/x-rst; charset=UTF-8 and
+    # fall back to text/plain if it is not valid rst" (see link below)
+    #
+    # This field corresponds to the "Description-Content-Type" metadata field:
+    # https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
+    long_description_content_type='text/markdown',  # Optional (see note above)
+
+    # This should be a valid link to your project's main homepage.
+    #
+    # This field corresponds to the "Home-Page" metadata field:
+    # https://packaging.python.org/specifications/core-metadata/#home-page-optional
+    url='https://github.com/pypa/sampleproject',  # Optional
+
+    # This should be your name or the name of the organization which owns the
+    # project.
+    author='The Python Packaging Authority',  # Optional
+
+    # This should be a valid email address corresponding to the author listed
+    # above.
+    author_email='pypa-dev@googlegroups.com',  # Optional
+
+    # Classifiers help users find your project by categorizing it.
+    #
+    # For a list of valid classifiers, see https://pypi.org/classifiers/
+    classifiers=[  # Optional
+        # How mature is this project? Common values are
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        'Development Status :: 3 - Alpha',
+
+        # Indicate who your project is intended for
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Build Tools',
+
+        # Pick your license as you wish
+        'License :: OSI Approved :: MIT License',
+
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate whether you support Python 2, Python 3 or both.
+        # These classifiers are *not* checked by 'pip install'. See instead
+        # 'python_requires' below.
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+    ],
+
+    # This field adds keywords for your project which will appear on the
+    # project page. What does your project relate to?
+    #
+    # Note that this is a string of words separated by whitespace, not a list.
+    keywords='sample setuptools development',  # Optional
+
+    # You can just specify package directories manually here if your project is
+    # simple. Or you can use find_packages().
+    #
+    # Alternatively, if you just want to distribute a single Python file, use
+    # the `py_modules` argument instead as follows, which will expect a file
+    # called `my_module.py` to exist:
+    #
+    #   py_modules=["my_module"],
+    #
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
+
+    # Specify which Python versions you support. In contrast to the
+    # 'Programming Language' classifiers above, 'pip install' will check this
+    # and refuse to install the project if the version does not match. If you
+    # do not support Python 2, you can simplify this to '>=3.5' or similar, see
+    # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
+
+    # This field lists other packages that your project depends on to run.
+    # Any package you put here will be installed by pip when your project is
+    # installed, so they must be valid existing projects.
+    #
+    # For an analysis of "install_requires" vs pip's requirements files see:
+    # https://packaging.python.org/en/latest/requirements.html
+    install_requires=['peppercorn'],  # Optional
+
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). Users will be able to install these using the "extras"
+    # syntax, for example:
+    #
+    #   $ pip install sampleproject[dev]
+    #
+    # Similar to `install_requires` above, these must be valid existing
+    # projects.
+    extras_require={  # Optional
+        'dev': ['check-manifest'],
+        'test': ['coverage'],
+    },
+
+    # If there are data files included in your packages that need to be
+    # installed, specify them here.
+    #
+    # If using Python 2.6 or earlier, then these have to be included in
+    # MANIFEST.in as well.
+    package_data={  # Optional
+        'sample': ['package_data.dat'],
+    },
+
+    # Although 'package_data' is the preferred approach, in some case you may
+    # need to place data files outside of your packages. See:
+    # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files
+    #
+    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
+    data_files=[('my_data', ['data/data_file'])],  # Optional
+
+    # To provide executable scripts, use entry points in preference to the
+    # "scripts" keyword. Entry points provide cross-platform support and allow
+    # `pip` to create the appropriate form of executable for the target
+    # platform.
+    #
+    # For example, the following would provide a command called `sample` which
+    # executes the function `main` from this package when invoked:
+    entry_points={  # Optional
+        'console_scripts': ['sample=sample:main',],},
+
+    # List additional URLs that are relevant to your project as a dict.
+    #
+    # This field corresponds to the "Project-URL" metadata fields:
+    # https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
+    #
+    # Examples listed include a pattern for specifying where the package tracks
+    # issues, where the source is hosted, where to say thanks to the package
+    # maintainers, and where to support the project financially. The key is
+    # what's used to render the link text on PyPI.
+    project_urls={  # Optional
+        'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
+        'Funding': 'https://donate.pypi.org',
+        'Say Thanks!': 'http://saythanks.io/to/example',
+        'Source': 'https://github.com/pypa/sampleproject/',
+    },
+)
+
+[Pp]ython   Match "Python" or "python"
+rub[ye]     Match "ruby" or "rube"
+[aeiou]     Match any one lowercase vowel
+[0-9]       Match any digit; same as [0123456789]
+[a-z]       Match any lowercase ASCII letter
+[A-Z]       Match any uppercase ASCII letter
+[a-zA-Z0-9] Match any of the above
+[^aeiou]    Match anything other than a lowercase vowel
+9 	
+
+[^0-9]
+
+Match anything other than a digit
+Special Character Classes
+Sr.No. 	Example & Description
+1 	
+
+.
+
+Match any character except newline
+2 	
+
+\d
+
+Match a digit: [0-9]
+3 	
+
+\D
+
+Match a nondigit: [^0-9]
+4 	
+
+\s
+
+Match a whitespace character: [ \t\r\n\f]
+5 	
+
+\S
+
+Match nonwhitespace: [^ \t\r\n\f]
+6 	
+
+\w
+
+Match a single word character: [A-Za-z0-9_]
+7 	
+
+\W
+
+Match a nonword character: [^A-Za-z0-9_]
+Repetition Cases
+Sr.No. 	Example & Description
+1 	
+
+ruby?
+
+Match "rub" or "ruby": the y is optional
+2 	
+
+ruby*
+
+Match "rub" plus 0 or more ys
+3 	
+
+ruby+
+
+Match "rub" plus 1 or more ys
+4 	
+
+\d{3}
+
+Match exactly 3 digits
+5 	
+
+\d{3,}
+
+Match 3 or more digits
+6 	
+
+\d{3,5}
+
+Match 3, 4, or 5 digits
+Nongreedy repetition
+
+This matches the smallest number of repetitions −
+Sr.No. 	Example & Description
+1 	
+
+<.*>
+
+Greedy repetition: matches "<python>perl>"
+2 	
+
+<.*?>
+
+Nongreedy: matches "<python>" in "<python>perl>"
+Grouping with Parentheses
+Sr.No. 	Example & Description
+1 	
+
+\D\d+
+
+No group: + repeats \d
+2 	
+
+(\D\d)+
+
+Grouped: + repeats \D\d pair
+3 	
+
+([Pp]ython(, )?)+
+
+Match "Python", "Python, python, python", etc.
+Backreferences
+
+This matches a previously matched group again −
+Sr.No. 	Example & Description
+1 	
+
+([Pp])ython&\1ails
+
+Match python&pails or Python&Pails
+2 	
+
+(['"])[^\1]*\1
+
+Single or double-quoted string. \1 matches whatever the 1st group matched. \2 matches whatever the 2nd group matched, etc.
+Alternatives
+Sr.No. 	Example & Description
+1 	
+
+python|perl
+
+Match "python" or "perl"
+2 	
+
+rub(y|le))
+
+Match "ruby" or "ruble"
+3 	
+
+Python(!+|\?)
+
+"Python" followed by one or more ! or one ?
+Anchors
+
+This needs to specify match position.
+Sr.No. 	Example & Description
+1 	
+
+^Python
+
+Match "Python" at the start of a string or internal line
+2 	
+
+Python$
+
+Match "Python" at the end of a string or line
+3 	
+
+\APython
+
+Match "Python" at the start of a string
+4 	
+
+Python\Z
+
+Match "Python" at the end of a string
+5 	
+
+\bPython\b
+
+Match "Python" at a word boundary
+6 	
+
+\brub\B
+
+\B is nonword boundary: match "rub" in "rube" and "ruby" but not alone
+7 	
+
+Python(?=!)
+
+Match "Python", if followed by an exclamation point.
+8 	
+
+Python(?!!)
+
+Match "Python", if not followed by an exclamation point.
+Special Syntax with Parentheses
+Sr.No. 	Example & Description
+1 	
+
+R(?#comment)
+
+Matches "R". All the rest is a comment
+2 	
+
+R(?i)uby
+
+Case-insensitive while matching "uby"
+3 	
+
+R(?i:uby)
+
+Same as above
+4 	
+
+rub(?:y|le))
+
+Group only without creating \1 backreference
+
+
+

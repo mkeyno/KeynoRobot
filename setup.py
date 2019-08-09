@@ -1,6 +1,5 @@
-import pathlib
-from setuptools import setup
-
+import pathlib,setuptools,os
+#python -m pip install --upgrade pip setuptools wheel
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
 

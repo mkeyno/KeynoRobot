@@ -1,19 +1,59 @@
-language: python
-python:
-    - "2.6"
-    - "3.6"
-    - "3.7"
-#script: python tests/__ini__.py
-script:
-  - git clone https://github.com/mkeyno/KeynoRobot.git
+# language: python
+# python:
+    # - "2.6"
+    # - "3.6"
+    # - "3.7"
+# #script: python tests/__ini__.py
+# script:
+  # - git clone https://github.com/mkeyno/KeynoRobot.git
   
-branches:
-  only:
-    - master
-deploy:
-  provider: pypi
-  user: mkeyno
-  repository: KeynoRobot
-  token: "1f809f5d6cb379568bc960a377d7a16e347355d5"
-  dist: "python"
+# branches:
+  # only:
+    # - master
+# deploy:
+  # provider: pypi
+  # user: mkeyno
+  # repository: KeynoRobot
+  # token: "1f809f5d6cb379568bc960a377d7a16e347355d5"
+  # dist: "python"
  
+language: python
+cache: pip  # You can use a cache to build faster
+python:
+  - '3.6'
+
+# your install script or your install list
+install: pip install KeynoRobot
+
+# your test script or your install list
+script: KeynoRobot --recursive .
+
+# settings for notifications, I personnaly don't like to be spammed on my email
+notifications:
+  email:
+    on_failure: never
+    on_pull_requests: never
+
+# the interresting part!
+deploy:
+  # If you need to deploy files Travis has built, use the next line
+  skip_cleanup: true
+  # In this case we want to deploy to pypi
+  provider: pypi
+  # What distribution we want to deploy
+  distributions: sdist bdist_wheel
+  # When do we want to deploy?
+  on:
+    # In this case I want to deploy only when a tag is present...
+    tags: true
+    # ... and when tag is on master and respects the form "v0.0.0"
+    branch:
+      - master
+      - /v?(\d+\.)?(\d+\.)?(\*|\d+)$/
+  # Your pypi username
+  user: mkeyno
+  # Your Pypi password secured by Travis if you have Travis CLI installed
+  password:
+    secure: cGJz+vETnxwWAZQvzveJKOyn3rWy3/tcVmJvTVuflrgKgwMRm+sfQZB3vo39LzDcDbMzlzxLO4SUsqDpCxlPPM1pCjqHeUkke76pXA3HGTqfSS5VBic979pBDBqzFe8SLxery0ND7uPAam2xtZQcMRjIzMZFS+ZBD3tD9pWFnFqQOaw6Mwnfj2dWuA7BeNEBEeG+EErAJTqWHlwodjLsDBBilrvYEMPha049JWSz9TE1SMUKWZszCpo2hda8edvcB7WrNWJCYO+Pmc56aUHGlqiyRUowec9ZQplhmD7HWriRvda4n+1WqUB8tdACqBSBo6t39dis/yiLDv/qZpi6cooxJBtlK184AZvCIfjiu8ua5JqJ/SBghzrwLf7b5VbWg/WOtS8NEB+TYhZhpmkYLPXnOoJLYbbrOYA/sz/QfwXke2NCTp7apZFAtU1lFN2gVWsmff7ysRWwwHW/iidCAcu9BXlwMt2x2dv5PqSSqN1QdwCQ+cGcewlIPInHwCpXwI4sJXPEHeax0J5c206Yf4PMkzgrUj1+UmpB2AKJkMF0+kGd+MOj9SXYbNE1Lc456CuvKUflVry12mVQCgqqL6lZQadQ+aNKy0LoK4o4CN6JTUMpIn6JIOapLc9hzOGZgVuFzZ5YAs6l8VraMzZuAzOEv79UB92B3Iq2Vxki8vo=
+  # Use the following if you don't have Travis CLI
+  password : ${PYPI_PASSWORD}
