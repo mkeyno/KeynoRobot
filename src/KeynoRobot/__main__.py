@@ -5,7 +5,7 @@ from  cli import *
 import exceptions
 import sys,os
 import packages.winapp as winapp
-
+import packages.cam as cam
 #import requests #facto standard for making HTTP requests in Python
 
 # from twine(root folder) import exceptions(.py)
@@ -19,6 +19,8 @@ def do_action(com):
         winapp.main()
     elif com=="web":
         print("web application loading")
+    elif com=="cam":
+        cam.main()    
     else:
         print("not correct command")
 

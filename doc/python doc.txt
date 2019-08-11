@@ -5,6 +5,9 @@ git push origin master
 
 pip-review --local --interactive
 
+python setup.py sdist
+twine upload dist/*
+
 
 1f809f5d6cb379568bc960a377d7a16e347355d5
  Types of learning algorithms
