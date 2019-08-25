@@ -9,6 +9,46 @@ python setup.py sdist
 twine upload dist/*
 
 
+sudo systemctl start firefly.service
+sudo systemctl stop firefly.service
+sudo systemctl restart firefly.service
+sudo systemctl reload-or-restart firefly.service
+sudo systemctl enable /path/to/myservice.service
+sudo systemctl disable firefly.service
+systemctl status mysql
+systemctl list-units --type=service
+systemctl list-units --type=service --all
+systemctl list-units --type=service --all --state=exited,inactive
+systemctl list-unit-files --type=service
+systemctl cat  firefly.service
+systemctl show firefly.service
+systemctl list-dependencies firefly.service
+sudo systemctl edit firefly.service
+systemctl list-unit-files --type=target
+systemctl list-units --type=target
+sudo systemctl reboot
+sudo nano /lib/systemd/system/firefly.service
+sudo systemctl daemon-reload
+sudo systemctl enable sample.service
+
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+sudo update-alternatives --config python
+sudo update-alternatives --list   python
+sudo update-alternatives --remove python /usr/bin/python3.5
+
+nano ~/.bashrc
+alias python='/usr/bin/python3'
+source ~/.bashrc
+
+sudo raspi-config
+
+
+
+
+
+
+
+
 1f809f5d6cb379568bc960a377d7a16e347355d5
  Types of learning algorithms
 

@@ -1,0 +1,12 @@
+ [Unit]
+ Description=FireFly main service
+ After=multi-user.target
+
+ [Service]
+  WorkingDirectory=/home/pi
+ ExecStart=/usr/bin/python3  /home/pi/program/KeynoRobot/src/KeynoRobot/__main__.py > /home/pi/program/main.log 2>&1
+ User=pi
+ 
+ [Install]
+ WantedBy=multi-user.target
+
