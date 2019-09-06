@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Firefly</title>
+<link rel="stylesheet" href="./static/w3.css">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+form {border: 3px solid #f1f1f1;}
+
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+}
+</style>
+</head>
+<body  style="background-color:rgb(240, 125, 0)" >
+<!-----------------------------header------------------------------------------------->
+<header  style="background-color:rgb(217, 59, 32); padding: 13px;" >
+	 <img class="w3-card-4" src="./static/auts.jpg" alt="Lights"  style="position:absolute;max-width:135px;top:1px;">
+	 <div class="w3-center"> 	
+		<p><font size="4" >Centre for Artificial Intelligence Research (CAIR)</font></p>
+		   <font size="5"  >AlBot Drone</font>		   
+	 </div>
+	 <div class="w3-right">
+		<img class="w3-card-4" src="./static/ascs.jpg"   style="position:absolute;max-width:200px;right:13px;top:1px;">
+	 </div>
+</header>
+<!----------------------------login-------------------------------------------------->  
+ <div class="w3-row">
+  <div class="w3-third w3-container">
+    
+  </div>
+  <div class="w3-third w3-container">
+   <h2 class="w3-center">Login Form</h2>
+
+<form action="/authenticate" method="POST">
+
+  <div class="container">
+    <label for="uname"><b>Username</b></label>
+    <input type="text" placeholder="Enter Username" name="uname" required>
+
+    <label for="psw"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="psw" required>
+        
+    <button type="submit">Login</button>
+    <label>
+      <input type="checkbox" checked="checked" name="remember"> Remember me
+    </label>
+  </div>
+
+  <div class="container" style="background-color:#f1f1f1">
+    <button type="button" class="cancelbtn">Cancel</button>
+    <span class="psw">Forgot <a href="#">password?</a></span>
+  </div>
+</form>
+  </div>
+  <div class="w3-third w3-container">
+    
+  </div>
+</div> 
+<div class="w3-container">
+
+ </div>
+<!----------------------------footer-------------------------------------------------->     
+<footer class="w3-container w3-black w3-margin-left">
+
+ <div class="w3-row">
+  <div class="w3-black w3-container w3-half" >
+    <h2 style="color:rgb(240, 125, 0);">About Centre for Artificial Intelligence Research (CAIR)</h2>
+	<p style=" text-align: justify;">Our mission is to create, develop and commercialise innovative IT products. Information Technology encompasses all forms of technology used to create and manipulate information in its various forms. The Centre’s primary goal is to provide a stimulating environment for the development of these different forms of technology in New Zealand under strong leadership. Our research is not ivory-towered. AUT is the only university of technology in New Zealand and as such our work is not only leading edge but by design, practically oriented.
+
+Given the wide range of research in IT, the Centre has decided to focus on four main areas of research and development - human language technology, speech technology, robotics and mind theory.
+
+The Director of the Institute is Professor Albert Yeap.</p>
+	
+<p>Contact	</p>
+<p>Professor Albert Yeap	</p>
+<p>Phone: +64 9 921-9999 ext 9565	</p>
+<p>Email: wai.yeap@aut.ac.nz	</p>
+
+  </div>
+  <div class="w3-black w3-container w3-half">
+     <h2  style="color:rgb(240, 125, 0);" >About AlBot</h2>
+	<p>This is my footer</p>
+  </div>
+</div> 
+</footer>
+
+
+</body>
+</html>

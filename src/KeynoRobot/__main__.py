@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from __future__ import absolute_import, division, print_function
 # from __future__ import unicode_literalsim 
 import os
@@ -5,30 +6,22 @@ from  cli import *
 import exceptions
 import sys,os
 import packages.winapp as winapp
+from  packages.main import server_begin
 import packages.cam as cam
-#import requests #facto standard for making HTTP requests in Python
-
-# from twine(root folder) import exceptions(.py)
-#                                exceptions.TwineException(  class TwineException(Exception): )
-
-#    KeynoRobot\cli.py
-#print(__version__)
+ 
 def do_action(com):
     
     if   com=="win":        
         winapp.main()
     elif com=="web":
-        print("web application loading")
+        print("web application loading");	server_begin()
     elif com=="cam":
         cam.main()    
-    else:
-        print("not correct command")
+    else: print("web started");	server_begin()
 
 parser = argparse.ArgumentParser(prog="KeynoRobot main command")	
-parser.add_argument("--version",action="version",
-                    #version="%(prog)s version {} ({})".format(KeynoRobot.__version__,dep_versions(),),
-                    )
-parser.add_argument("command",help="name of commands")
+parser.add_argument("--version",action="version")
+parser.add_argument("--command",help="name of commands",default="web")
 
 def dispatch():
     #print("dispatch")
@@ -38,7 +31,7 @@ def dispatch():
     # parser.add_argument("args",help=argparse.SUPPRESS,nargs=argparse.REMAINDER,)
     args = parser.parse_args()
     # main = registered_commands[args.command].load()    
-    print("you enter:",args.command,sys.argv[1:])
+    print("you enter:",args.command)
     do_action(args.command.lower())#main(args.args)
     #return True
     
@@ -54,7 +47,7 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())#it will exit giving the system the return code that is the result of main()
+     main() 
 
 
 

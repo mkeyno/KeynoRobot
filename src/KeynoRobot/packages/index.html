@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Firefly</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./static/w3.css">
+<script src="./static/index.js"></script>
+<link  href="./static/index.css" rel="stylesheet" type="text/css">
+<script type="text/javascript">  
+/*
+interface Props {
+    pitch: number;
+    roll: number;    
+    heading?: number;
+	
+	airspeed?: number;
+    Altitude?: number;	
+    Thrust?: number;
+	
+	Latitude 
+	Longitude
+	Height
+	
+    Battery?: number;
+	Flight Mode
+	Height Control
+	GPS
+	Serial Interace Enabaled
+	Serial Interace Active
+	Emergency
+}*/
+var _Connection;
+//Roll2HUD(0);
+//Yaw2HUD(0);
+//Pitch2HUD(0);
+//var host = window.document.location.host.replace(/:.*/, '');
+var link="ws://"+location.host+"/ws";
+window.onload = function ()
+  {     
+//    Wave( "logo.png",'flag',8,200);
+//   Wave( "images/logo1.png",'flag2',8,200);
+ setTimeout( ini_ws , 100);
+  }
+
+ 
+</script>
+</head>
+<body  style="background-color:rgb(240, 125, 0)" >
+<!-----------------------------header------------------------------------------------->
+<header  style="background-color:rgb(217, 59, 32); padding: 13px;" >
+ <img class="w3-card-4" src="./static/auts.jpg" alt="Lights"  style="position:absolute;max-width:135px;top:1px;">
+ <div class="w3-center"> 	
+	<p><font size="4" >Centre for Artificial Intelligence Research (CAIR)</font></p>
+	   <font size="5"  >AlBot Drone</font>	
+	   <input  style="border:1px #A9A9A9 solid;" type="button" id="_link" onclick="ini_ws();return false;" name="" value="Disconnected" >
+	   
+ </div>
+ <div class="w3-right">
+ <img class="w3-card-4" src="./static/ascs.jpg"   style="position:absolute;max-width:200px;right:13px;top:1px;">
+ </div>
+</header>
+<!------------------------------menu------------------------------------------------>
+<div class="w3-center">
+	<div class="w3-bar  w3-card-4" style="width:100%;background-color:rgb(242, 101, 34)" >
+	  <button class="w3-bar-item w3-hover-black w3-button " onclick="openCity('London')">Status</button>
+	  <button class="w3-bar-item w3-hover-black w3-button w3-hide-small" onclick="openCity('Tokyo')">Setting</button>
+	  <button class="w3-bar-item w3-hover-black w3-button w3-hide-small" onclick="openCity('Paris')">Analyzing</button>  
+	  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="myFunction()">&#9776;</a>
+	</div>
+</div>
+ 
+<div id="demo" class="w3-bar-block w3-red w3-hide w3-hide-large w3-hide-medium">
+  <a href="#" class="w3-bar-item w3-button" onclick="openCity('London')">Status</a>
+  <a href="#" class="w3-bar-item w3-button" onclick="openCity('Paris')">Setting</a>
+  <a href="#" class="w3-bar-item w3-button" onclick="openCity('Tokyo')">Analyzing</a>
+</div>
+
+<!----------------------------------home ------------------------------------------------------->
+<div id="London" class="w3-container city" >
+<div class="w3-row-padding" style="background-color:rgb(255, 255, 255)">
+<!------------------------------------------------------------------------------>
+  <div class="w3-third w3-border"  style="height:680px" > <!--------left pannel--------->
+  
+	  <div class="w3-center w3-black"  style="width:100%;height:400px;" >
+	   <p>Horizontal Camera</p>
+	    <img src="/imageH" class="w3-border" alt="Horizontal Camera" style="width:100%;"> 
+	  
+	  </div>
+	  <div class="w3-center"  style="width:100%;" >
+		  <table >
+			  <tr><th   colspan="6">Flight Mode</th></tr>
+			  <tr><td><input  type="checkbox" id="H_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Height Control</td></tr>
+			  <tr><td><input  type="checkbox" id="GPS_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">GPS </td></tr>
+			  <tr><td><input  type="checkbox" id="SerialEnabaled" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Serial Interace Enabaled</td></tr>
+			  <tr><td><input  type="checkbox" id="SerialActive" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Serial Interace Active</td></tr>
+			  <tr><td><input  type="checkbox" id="Emergency_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Emergency</td></tr>	
+		 </table>		 
+	 </div>
+	 <button class="w3-btn w3-block w3-blue w3-center-align">Hover from ground</button>
+
+   
+   
+  </div>
+  <div class="w3-third w3-border"  style="height:680px">  <!-----------HUD-------------->
+	<div class="w3-center">  
+	  <p><strong>Heads Up Display.</strong></p>
+	  	   <div class="container" style="height: 350px; width:100%; ">
+		<div id="RoLL_S" class="fullWrap absolute" style="transform:  rotate(0 deg);"> <!--roll -->
+			<img id="horizon" src="./static/horizon-bg.svg" class="horizon"            style="top:-150%;"> <!--pitch -->
+			<div class="horizonHider">
+				<div class="horizonInner">											                         <!--pitch -->
+					<img id="horizon1" src="./static/horizon-ticks.svg" class="horizon" style="top:-150%; object-fit: cover;">
+				</div>
+			</div>
+			<img class="absolute" src="./static/pitch-ring.svg">
+		</div>
+		
+		<img class="fullWrap absolute" src="./static/plane-indicator.svg" class="verticalGauge">	
+		
+		<img src="./static/vertical-gauge.svg" class="verticalGauge">
+		<div     id="altSX" class="airspeedIndication font">52</div>	<!--Altitude -->	
+		<div class="verticalTickContainer font">
+			<div id="altSp2" class="verticalTick" style="margin-top: 16.3082px;">70</div> <!--Altitude -->	
+			<div id="altSp1" class="verticalTick">60</div> <!--Altitude -->	
+			<div id="altS0" class="verticalTick">50</div> <!--Altitude -->	
+			<div id="altSm1" class="verticalTick">40</div><!--Altitude -->	
+			<div id="altSm2" class="verticalTick">30</div><!--Altitude -->	
+			<div id="altSE" class="verticalTickRight verticalTick"                               >(m)</div><!--Altitude -->
+		</div>
+		
+		<img src="./static/vertical-gauge.svg" class="verticalGaugeRight verticalGauge">
+		<div     id="airSX" class="altitudeIndication airspeedIndication font"                   >52</div>  <!--Airspeed -->
+		<div class="verticalTickContainerRight verticalTickContainer font">
+			<div id="airSp2" class="verticalTickRight verticalTick" style="margin-top: 22.6163px;">60</div><!--Airspeed -->
+			<div id="airSp1" class="verticalTickRight verticalTick"                               >55</div><!--Airspeed -->
+			<div id="airS0" class="verticalTickRight verticalTick"                               >50</div><!--Airspeed -->
+			<div id="airSm1" class="verticalTickRight verticalTick"                               >45</div><!--Airspeed -->
+			<div id="airSm2" class="verticalTickRight verticalTick"                               >40</div><!--Airspeed -->
+			<div id="airSE" class="verticalTickRight verticalTick"                               >(km/h)</div><!--Airspeed -->
+		</div>
+		
+		
+		
+		<div class="headingBar">
+			<img id="yawbar" src="./static/heading-bar.svg" class="headingImg" style="left:-96px;">  <!--yaw-->
+			<div id="yawname" class="headingIndication font">328</div>         <!--yaw-->
+		</div>
+	</div>
+	
+	<form class="w3-container"><!--- keys HUD-------->
+		<div class="w3-row">
+		 <table id="myTable" style="width:100%">
+		   <tr>
+			<th   colspan="6">Atitiude</th>    
+		  </tr>
+		  <tr>
+			<td>RoLL </td><td id="RoLL">-------</td>
+			<td>Pitch</td><td id="Pitch">-------</td>
+			<td>Yaw  </td><td id="Yaw">-------</td>
+		  </tr>
+		  <tr>
+		   <td>Airspeed </td><td id="Airspeed">-------</td>
+			<td>Altitude</td><td id="Altitude">-------</td>
+			<td>Thrust</td><td id="Thrust">-------</td>
+		  </tr>
+		  <tr>
+			<th   colspan="6">GPS</th>    
+		  </tr>
+		  <tr>
+			<td>Latitude </td><td id="Latitude">---</td>
+			<td>Longitude</td><td id="Longitude">---</td>
+			<td>Height</td><td id="Height">---</td>
+		  </tr>		 
+		</table>		 
+		</div>
+       <div class="w3-center" >
+		   <div class="w3-center"  style="width:100%;" >
+			<input class="shouldDis" type="range"   id="pointsroll" min="-90" max="90" step="5"  value="0" onchange="changeRoll(this.id);return false;">
+		   </div>
+		   <div class="w3-center"  style="width:100%;" >
+		   <input class="shouldDis" type="range"   id="pointpith"  min="-210" max="-90" step="5"  value="-150" onchange="changePitch(this.id);return false;">
+		   </div>
+		   <div class="w3-center"  style="width:100%;" >
+		   <input class="shouldDis" type="range"   id="pointsyaw"  min="0" max="360" step="5"   onchange="changeYaw(this.id);return false;">
+		   </div>
+		   <div class="w3-center"  style="width:100%;" >
+		   <input class="shouldDis" type="range"   id="pointvelo"  min="0" max="100" step="1"   onchange="changeAirspeed(this.id);return false;">
+		   </div>
+			 <div class="w3-center"  style="width:100%;" >
+		   <input class="shouldDis" type="range"   id="poifntvelo"  min="0" max="500" step="1"   onchange="changepAltitude(this.id);return false;">
+		   </div>
+	   </div>
+	</form>
+	</div>
+  </div>
+  <div class="w3-third w3-border"  style="height:680px">  <!--------right panned-------->
+	  <div class="w3-center w3-black"  style="width:100%;height:400px;" >
+		  <p>Vertical Camera</p>
+		  <img src="/imageV" class="w3-border" alt="Vertical Camera" style="width:100%;"> 
+	  </div>
+	  
+	<div class="w3-row" >
+		<div class="w3-col" style="width:30%">
+		    <span style="margin-top:20px;" ><strong>Battery:</strong></span><span  id="batteryval">...</span>
+			<div class=" w3-center" style="margin-top:25px;">
+			<input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:160px;z-index:32;background-image:linear-gradient(green, red);" id="batteryB"  value="" readonly="">  
+            <input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:155px;z-index:34;"  readonly="" onclick="move()"                id="battery" value="0%">
+ 			</div>
+		</div>
+		
+		<div class="w3-col" style="width:70%">		
+		  <div class="w3-center" >
+			<button id="UP_ID"    type="buttom" onclick="Forward();return false;"  style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25B2;</button>
+		  </div>
+		  <div class="w3-center" >
+			<button id="Right_ID" type="buttom" onclick="go_left();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25C4;</button>
+			<input class="w3-button w3-circle w3-black w3-center" type="button" id="Buttonstop" onclick="Stop();return false;" name="" value="Stop" style="width:50px;height:50px; margin-top:-25px;padding-left:5px;" >                            
+			<button id="Right_ID" type="buttom" onclick="go_right();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25BA;</button>
+		  </div>
+		  <div class="w3-center" >
+			<button id="Down_ID" type="buttom" onclick="Backword();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#9660;</button>	      
+		  </div>
+	    </div>
+	</div>
+  </div>
+<!-------------------------------------------------lower pannel -------------------------------------------------------->
+  <div class=" w3-container w3-padding-24 w3-border ">
+			<button onclick="clicktohide()" class=" w3-round-large w3-button w3-mobile ">Advanced Keys</button>
+			<div id="Demop" class="w3-hide ">
+				<button class="w3-button w3-right w3-green w3-round-large">Accept</button>
+				<button class="w3-button          w3-blue  w3-round-large">Decline</button>
+				<button class="w3-button w3-circle w3-black">+</button>
+				<button class="w3-button w3-circle w3-teal">+</button> 
+			</div>
+   </div>
+<!------------------------------------------------------------------------------>      
+</div>   
+
+</div>
+<!------------------------------Anayasing------------------------------------------------>
+<div id="Paris" class="w3-container city" style="display:none">
+ 
+	<div  class="w3-container " style="background-color:rgb(255, 255, 255)">
+	 <h2>Anayasing</h2>
+	  <p>This page design for data analayzing provided by drone</p> 
+	  
+
+	</div> 
+ 
+</div>
+<!---------------------------------Setting--------------------------------------------->
+<div id="Tokyo" class="w3-container city" style="display:none">
+	 <div class="w3-container " style="background-color:rgb(255, 255, 255)">
+		  <div class="w3-row">
+			  <div class="w3-col w3-container w3-green"  style="width:35%">
+				
+				<div class="w3-row">
+				 <table id="myTable" style="width:100%">
+				   <tr>
+					<th   colspan="8">Raw Sensor Data</th>    
+				  </tr>
+				  <tr>
+					<td>Gyro X</td><td id="RoLL">---</td>
+					<td>Mag X</td><td id="Pitch">---</td>
+					<td>ACC X </td><td id="Yaw">---</td>
+					<td>Height</td><td id="Height">---</td>
+				  </tr>
+				  <tr>
+				   <td>Gyro Y </td><td id="Airspeed">---</td>
+					<td>Mag Y</td><td id="Altitude">---</td>
+					<td>ACC Y</td><td id="Thrust">---</td>
+					<td>Height</td><td id="Height">---</td>
+				  </tr>
+				  <tr>
+					<td>Gyro Z </td><td id="Latitude">---</td>
+					<td>Mag Z</td><td id="Longitude">---</td>
+					<td>ACC Z</td><td id="Height">---</td>
+					<td>Height</td><td id="Height">---</td>
+				  </tr>		 
+				</table>		 
+				</div>
+				
+				<div class="w3-row">
+				 <table id="myTable" style="width:100%">
+				   <tr><th   colspan="6">RC Data</th></tr>
+				  <tr><td>RoLL     </td><td id="RoLL">-------</td></tr>
+				  <tr><td>Pitch    </td><td id="Airspeed">-------</td></tr>
+				  <tr><td>Yaw      </td><td id="Latitude">---</td></tr>
+				  <tr><td>Trottle  </td><td id="Latitude">---</td></tr>
+				</table>		 
+				</div>
+				
+			  </div>
+			  <div class="w3-col w3-container w3-blue"  style="width:30%">
+				<h2>w3-third</h2>
+			  </div>
+			  <div class="w3-col w3-container w3-red"   style="width:35%">
+				<h2>w3-third</h2>
+			  </div>
+		  </div>
+		  <div class="w3-container">
+			  <h2>Setting</h2>
+			  <p>This page design for drone setting</p>
+			  <button onclick="Disable1()">Disable it</button>
+			  <button onclick="Enable1()">Enable it</button>
+		  </div>
+	</div>  
+</div>      
+      
+<!----------------------------footer-------------------------------------------------->     
+<footer class="w3-container w3-black w3-margin-left">
+
+ <div class="w3-row">
+  <div class="w3-black w3-container w3-half" >
+    <h2 style="color:rgb(240, 125, 0);">About Centre for Artificial Intelligence Research (CAIR)</h2>
+	<p style=" text-align: justify;">Our mission is to create, develop and commercialise innovative IT products. Information Technology encompasses all forms of technology used to create and manipulate information in its various forms. The Centre’s primary goal is to provide a stimulating environment for the development of these different forms of technology in New Zealand under strong leadership. Our research is not ivory-towered. AUT is the only university of technology in New Zealand and as such our work is not only leading edge but by design, practically oriented.
+
+Given the wide range of research in IT, the Centre has decided to focus on four main areas of research and development - human language technology, speech technology, robotics and mind theory.
+
+The Director of the Institute is Professor Albert Yeap.</p>
+	
+<p>Contact	</p>
+<p>Professor Albert Yeap	</p>
+<p>Phone: +64 9 921-9999 ext 9565	</p>
+<p>Email: wai.yeap@aut.ac.nz	</p>
+
+  </div>
+  <div class="w3-black w3-container w3-half">
+     <h2  style="color:rgb(240, 125, 0);" >About AlBot</h2>
+	<p>This is my footer</p>
+  </div>
+</div> 
+</footer>
+
+
+</body>
+</html>
