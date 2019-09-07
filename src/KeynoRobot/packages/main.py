@@ -65,35 +65,35 @@ class VideoCamera(object):
     
 @middleware
 async def authorize(request, handler):
-	print("Do Auchetication=",request.path.startswith('/login')) #False
-	session = await aiohttp_session.get_session(request)
-	print("Dsession uid=",session.get('uid'))
-	if (not session.get('uid')) and (not request.path.startswith('/login')):
-		url = request.app.router['login'].url_for()
-		log.debug('redirecting to {}'.format(str(url)))
-		raise web.HTTPFound(url)
-	response = await handler(request)
-	return response
-	
+    print("Do Auchetication=",request.path.startswith('/login')) #False
+    session = await aiohttp_session.get_session(request)
+    print("Dsession uid=",session.get('uid'))
+    if (not session.get('uid')) and (not request.path.startswith('/login')):
+        url = request.app.router['login'].url_for()
+        log.debug('redirecting to {}'.format(str(url)))
+        raise web.HTTPFound(url)
+    response = await handler(request)
+    return response
+    
 def redirect(request, router_name):
-	url = request.app.router[router_name].url_for()
-	print("redirect url =",url) #False
-	log.debug('redirecting to {}'.format(url))
-	raise web.HTTPFound(url)
+    url = request.app.router[router_name].url_for()
+    print("redirect url =",url) #False
+    log.debug('redirecting to {}'.format(url))
+    raise web.HTTPFound(url)
 
 '''middleware redirects to Login in case there is no 'uid' found in the request's session'''
 class Login(web.View):
-	async def get(self):
-		session = await get_session(self.request)
-		uid = 'user{0}'.format(random.randint(1, 1001))
-		uids = self.request.app['uids']
-		while uid in uids:
-			uid = 'user{0}'.format(random.randint(1, 1001))
-		uids.append(uid)
-		self.request.app['uids'] = uids
-		session['uid'] = uid
-		log.debug(uid)
-		redirect(self.request, '/')
+    async def get(self):
+        session = await get_session(self.request)
+        uid = 'user{0}'.format(random.randint(1, 1001))
+        uids = self.request.app['uids']
+        while uid in uids:
+            uid = 'user{0}'.format(random.randint(1, 1001))
+        uids.append(uid)
+        self.request.app['uids'] = uids
+        session['uid'] = uid
+        log.debug(uid)
+        redirect(self.request, '/')
 WSID=0
 
 class WSClient(object):
@@ -103,7 +103,7 @@ class WSClient(object):
         self.id = WSID
         self.ws = ws
         WSID+=1
-	
+    
     async def send(self,msg):
          await self.ws.send_str(msg)
 
@@ -183,7 +183,7 @@ async def mjpeg_handler(request):
 
 def parsing(data):
     print(">>>>>>>",data)
-	
+    
 async def websocket_handler(request):
     global GlobalWS
     print("this is another one ",GlobalWS)
@@ -210,7 +210,7 @@ async def websocket_handler(request):
 """
     #hash      = request.match_info["hash"];print("equest.match_info[hash]=",hash)
     #logging.debug("Client Request from {}".format(clientIP))  
-	#if not XXXXX:
+    #if not XXXXX:
     #    raise web.HTTPNotFound(text="folder was deleted or never existed")
     GlobalWS = web.WebSocketResponse()
 
@@ -230,7 +230,7 @@ async def websocket_handler(request):
     request.app["websockets"].remove(GlobalWS)
     GlobalWS=None
     return GlobalWS
-	
+    
 async def websockets_clear(app):
     for ws in app['websockets']:
         await ws.close()
@@ -261,8 +261,8 @@ async def handle_authenticate(request):
     print("username =",user," password =",password ) 
     #browse(locals(), 'locals()')
     return await handle_index_page(request)
-	
-	
+    
+    
 async def setup_server(loop, address, port):
     app = web.Application(loop=loop)
     app.router.add_route('GET', "/login", handle_login_page) #login?uname=asd&psw=asd&remember=on 
@@ -283,14 +283,14 @@ async def setup_server(loop, address, port):
     # app.middlewares.append(authorize)
     #print(app.router['login'].url_for())
     #aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(STATIC_DIR))
-	
+    
     # for name, resource in app.router.named_resources().items():
       # print("Name of resource:",name,"R=", resource)
     return await loop.create_server(app.make_handler(), address, port)
 
 def server_begin():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(setup_server(loop, '127.0.0.1', 8080))
+    loop.run_until_complete(setup_server(loop, '0.0.0.0', 8080))
     print("Server ready!")
     try:
         loop.run_forever()

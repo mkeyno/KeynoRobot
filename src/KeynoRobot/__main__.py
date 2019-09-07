@@ -5,14 +5,14 @@ import os
 from  cli import *
 import exceptions
 import sys,os
-import packages.winapp as winapp
+#import packages.winapp as winapp
 from  packages.main import server_begin
 import packages.cam as cam
  
 def do_action(com):
     
     if   com=="win":        
-        winapp.main()
+        pass #winapp.main()
     elif com=="web":
         print("web application loading");	server_begin()
     elif com=="cam":
