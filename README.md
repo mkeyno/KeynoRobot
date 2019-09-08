@@ -12,3 +12,7 @@ This peoject has been started on Centre for Artificial Intelligence Research (CA
 Cognitive maps are a natural cognition of many species to understand spatial environmental and utilized it to orientation and localization purposeDr. Albert  Cognitive mapping theory is the Computational approach base on learning of empiricalobservation base on the relation of successive View s model. Similar to many species which they observed and  remember snapshots (important object of 2D images) of a place and use them as part of their navigation strategy and special localization
 # Goal & Mission
 The final mission comprises flying autonomously and recognize the special environment and learn important object and used this acquired knowledge for map surveying and route creation
+
+[![AscTech FireFly Hexacopter](https://github.com/mkeyno/KeynoRobot/blob/master/doc/firefly.png)](https://www.youtube.com/watch?v=bicupEW7gRw "AscTech FireFly Hexacopter")
+
+-   ![link to fly on YouTube](https://www.youtube.com/watch?v=bicupEW7gRw)
