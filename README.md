@@ -32,4 +32,20 @@ The core program consists three coroutines and one sub coroutine,
  ![-](https://github.com/mkeyno/Small-Raspberry-Picker-Robot/blob/master/resources/ros.jpg) 
  ![-](https://github.com/mkeyno/Small-Raspberry-Picker-Robot/blob/master/resources/TensorFlow.jpg)
 
+### Current Status
+ - coroutines of OpenCV & Webserver installed
+ - serial connection to the Autopilot established
+ 
 
+### Next  Stage
+install & test of Denseb Optical Flow  (Gunnar Farneback) & sparse optical flow ( Lucas–Kanade) library
++ add TLS security layer to web application
++ install LiDAR or ToF range finder sensor and connect them  to ROS master node
+ 
+ ### installation
+ This project need python 3.6+. to install th e package use ``` pip install KeynoRobot```
+ then use ```python3 -m  KeynoRobot```
+ open the browser at address ```127.0.0.1:8080``` or ```CAIR.local:8080```
+ use admin & admin for user & password for login page 
+ 
+![-](https://github.com/mkeyno/KeynoRobot/blob/master/doc/web.png)
