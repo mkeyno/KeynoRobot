@@ -3,8 +3,9 @@
  After=multi-user.target
 
  [Service]
+ Type=idle
   WorkingDirectory=/home/pi
- ExecStart=/usr/bin/python3  /home/pi/program/KeynoRobot/src/KeynoRobot/__main__.py > /home/pi/program/main.log 2>&1
+ ExecStart=/usr/bin/python3  /home/pi/github/KeynoRobot/src/KeynoRobot/__main__.py & > /home/pi/Documents/KeynoRobot.log 2>&1
  User=pi
  
  [Install]

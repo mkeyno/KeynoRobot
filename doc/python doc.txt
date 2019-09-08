@@ -8,6 +8,17 @@ git reset --hard origin/master
 git pull https://github.com/mkeyno/KeynoRobot.git  master
 
 
+sudo cp /home/pi/sample.py /etc/init.d/
+sudo chmod +x sample.py
+sudo update-rc.d sample.py defaults
+
+sudo nano /lib/systemd/system/firefly.service
+sudo nano /home/pi/.bashrc
+sudo nano /etc/rc.local
+sudo nano /etc/profile
+/usr/bin/python3  /home/pi/github/KeynoRobot/src/KeynoRobot/__main__.py &
+
+
 pip-review --local --interactive
 
 python setup.py sdist
@@ -18,9 +29,10 @@ sudo systemctl start firefly.service
 sudo systemctl stop firefly.service
 sudo systemctl restart firefly.service
 sudo systemctl reload-or-restart firefly.service
-sudo systemctl enable /path/to/myservice.service
+sudo systemctl enable /lib/systemd/system/firefly.service
 sudo systemctl disable firefly.service
-systemctl status mysql
+systemctl status firefly.service
+
 systemctl list-units --type=service
 systemctl list-units --type=service --all
 systemctl list-units --type=service --all --state=exited,inactive

@@ -39,7 +39,8 @@ window.onload = function ()
   {     
 //    Wave( "logo.png",'flag',8,200);
 //   Wave( "images/logo1.png",'flag2',8,200);
- setTimeout( ini_ws , 100);
+ setTimeout( ini_ws , 400);
+ 
   }
 
  
@@ -53,8 +54,9 @@ window.onload = function ()
 	<p><font size="4" >Centre for Artificial Intelligence Research (CAIR)</font></p>
 	   <font size="5"  >AlBot Drone</font>	
 	   <input  style="border:1px #A9A9A9 solid;" type="button" id="_link" onclick="ini_ws();return false;" name="" value="Disconnected" >
-	   
+	    <font size="3" style="position:absolute;right:250px;top:80px;">admin: Log Out</font> 
  </div>
+ 
  <div class="w3-right">
  <img class="w3-card-4" src="./static/ascs.jpg"   style="position:absolute;max-width:200px;right:13px;top:1px;">
  </div>
@@ -62,7 +64,7 @@ window.onload = function ()
 <!------------------------------menu------------------------------------------------>
 <div class="w3-center">
 	<div class="w3-bar  w3-card-4" style="width:100%;background-color:rgb(242, 101, 34)" >
-	  <button class="w3-bar-item w3-hover-black w3-button " onclick="openCity('London')">Status</button>
+	  <button style="margin-left: 150px;" class="w3-bar-item w3-hover-black w3-button " onclick="openCity('London')">Status</button>
 	  <button class="w3-bar-item w3-hover-black w3-button w3-hide-small" onclick="openCity('Tokyo')">Setting</button>
 	  <button class="w3-bar-item w3-hover-black w3-button w3-hide-small" onclick="openCity('Paris')">Analyzing</button>  
 	  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="myFunction()">&#9776;</a>
@@ -79,12 +81,22 @@ window.onload = function ()
 <div id="London" class="w3-container city" >
 <div class="w3-row-padding" style="background-color:rgb(255, 255, 255)">
 <!------------------------------------------------------------------------------>
-  <div class="w3-third w3-border"  style="height:680px" > <!--------left pannel--------->
+  <div class="w3-third w3-border"  style="height:720px" > <!--------left pannel--------->
   
 	  <div class="w3-center w3-black"  style="width:100%;height:400px;" >
 	   <p>Horizontal Camera</p>
-	    <img src="/imageH" class="w3-border" alt="Horizontal Camera" style="width:100%;"> 
-	  
+	    <img id="cameraLeft" src="./static/leftcam.jpg" class="w3-border" alt="Horizontal Camera" style="width:100%; max-height: 350px;"> 	  
+	  </div>
+	    <div class="w3-center w3-container w3-card-4" >
+		  <table style="width:100%;" >
+			  <tr>
+			   <td>dx</td><td>...</td> <td>dy</td><td>...</td> <td>dr</td><td>...</td> 			  
+			   <td>P</td><td>...</td> <td>I</td><td>...</td> <td>D</td><td>...</td> 
+			  </tr>
+		    </table>		
+	  </div>
+	  <div class="w3-center"   >
+		<input id="cameraLeftb" class="w3-btn  w3-blue w3-center " type="button" onclick="cameraLeft(this.id);return false;"  value="Open Camera">
 	  </div>
 	  <div class="w3-center"  style="width:100%;" >
 		  <table >
@@ -96,12 +108,16 @@ window.onload = function ()
 			  <tr><td><input  type="checkbox" id="Emergency_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Emergency</td></tr>	
 		 </table>		 
 	 </div>
-	 <button class="w3-btn w3-block w3-blue w3-center-align">Hover from ground</button>
-
+	 
+	 <div class="w3-center"   >
+		<input id=""   type="button" onclick=""  value="Object detect" style="padding-left: 8px;padding-right: 8px;">
+		<input id=""   type="button" onclick=""  value="Hover on Ground" style="padding-left: 8px;padding-right: 8px;">
+		<input id=""   type="button" onclick=""  value="Optical Flow" style="padding-left: 8px;padding-right: 8px;">
+	</div>
    
    
   </div>
-  <div class="w3-third w3-border"  style="height:680px">  <!-----------HUD-------------->
+  <div class="w3-third w3-border"  style="height:720px">  <!-----------HUD-------------->
 	<div class="w3-center">  
 	  <p><strong>Heads Up Display.</strong></p>
 	  	   <div class="container" style="height: 350px; width:100%; ">
@@ -193,27 +209,39 @@ window.onload = function ()
 	</form>
 	</div>
   </div>
-  <div class="w3-third w3-border"  style="height:680px">  <!--------right panned-------->
+  <div class="w3-third w3-border"  style="height:720px">  <!--------right panned-------->
 	  <div class="w3-center w3-black"  style="width:100%;height:400px;" >
 		  <p>Vertical Camera</p>
-		  <img src="/imageV" class="w3-border" alt="Vertical Camera" style="width:100%;"> 
+		  <img src="./static/rightcam.jpg" class="w3-border" alt="Vertical Camera" style="width:100%; max-height: 350px;"> 
+	  </div>
+	  <div class="w3-center w3-container w3-card-4" >
+		  <table style="width:100%;" >
+			  <tr>
+			   <td>dx</td><td>...</td> <td>dy</td><td>...</td> <td>dr</td><td>...</td> 			  
+			   <td>P</td><td>...</td> <td>I</td><td>...</td> <td>D</td><td>...</td> 
+			  </tr>
+		    </table>		
+	  </div>
+	   <div class="w3-center"   >
+		<input id="camerarightb" class="w3-btn  w3-blue w3-center " type="button" onclick="cameraLeft(this.id);return false;"  value="Open Camera">
 	  </div>
 	  
 	<div class="w3-row" >
-		<div class="w3-col" style="width:30%">
-		    <span style="margin-top:20px;" ><strong>Battery:</strong></span><span  id="batteryval">...</span>
-			<div class=" w3-center" style="margin-top:25px;">
-			<input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:160px;z-index:32;background-image:linear-gradient(green, red);" id="batteryB"  value="" readonly="">  
-            <input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:155px;z-index:34;"  readonly="" onclick="move()"                id="battery" value="0%">
+		<div class="w3-col" style="width:20%">
+		    <span style="margin-top:20px;" >Battery:</span><span  id="batteryval">...</span><span >Trottle</span><span  id="Trottle">...</span>
+			<div class=" w3-center" style="margin-top:1px;">.
+				<input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:160px;z-index:32;background-image:linear-gradient(green, red);" id="batteryB"  value="" readonly="">  
+				<input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:155px;z-index:34;"  readonly="" onclick="move()"                id="battery" value="0%">
+				<input   type="range" style="border:1px #A9A9A9 solid;position:relative;left:40px;width:150px;top:50px;transform: rotate(270deg);" id="baasdtteryB"  value="cvxcvzxc" readonly="">
  			</div>
 		</div>
 		
-		<div class="w3-col" style="width:70%">		
+		<div class="w3-col" style="width:80%">		
 		  <div class="w3-center" >
 			<button id="UP_ID"    type="buttom" onclick="Forward();return false;"  style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25B2;</button>
 		  </div>
 		  <div class="w3-center" >
-			<button id="Right_ID" type="buttom" onclick="go_left();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25C4;</button>
+			<button id="Right_ID" type="buttom" onclick="go_left();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;margin-right: 10px;">&#x25C4;</button>
 			<input class="w3-button w3-circle w3-black w3-center" type="button" id="Buttonstop" onclick="Stop();return false;" name="" value="Stop" style="width:50px;height:50px; margin-top:-25px;padding-left:5px;" >                            
 			<button id="Right_ID" type="buttom" onclick="go_right();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25BA;</button>
 		  </div>
@@ -225,13 +253,41 @@ window.onload = function ()
   </div>
 <!-------------------------------------------------lower pannel -------------------------------------------------------->
   <div class=" w3-container w3-padding-24 w3-border ">
-			<button onclick="clicktohide()" class=" w3-round-large w3-button w3-mobile ">Advanced Keys</button>
-			<div id="Demop" class="w3-hide ">
-				<button class="w3-button w3-right w3-green w3-round-large">Accept</button>
-				<button class="w3-button          w3-blue  w3-round-large">Decline</button>
-				<button class="w3-button w3-circle w3-black">+</button>
-				<button class="w3-button w3-circle w3-teal">+</button> 
-			</div>
+	  <button onclick="clicktohide()" class=" w3-button w3-blue w3-block w3-card-4 ">Advanced Console     &     Google map</button>
+ 
+	  <div id="Demop" class="w3-row w3-hide">
+		  <div class="w3-col w3-container w3-border"  style="width:25%;height:200px;">
+ 
+ 
+				<p>Console in</p>
+			<button  >Clear Console</button> 
+ 
+			<textarea name="TextArea1" id="sim_tb" style="width:100%;"  > </textarea>
+		  </div>
+		  <div class="w3-col w3-container   "  style="width:50%">
+				
+				<div id="googleMap" class="w3-blue  " style="width:100%;height:100%;" ></div>
+				<script>
+				function myMap() {
+				var mapProp= {
+				  center:new google.maps.LatLng(51.508742,-0.120850),
+				  zoom:5,
+				};
+				var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+				}
+				</script>
+
+				<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkJNZkEqJ6HZsZqmwjCdPkNgcTYXkceww&callback=myMap"></script>
+		  </div>
+		  <div class="w3-col w3-container w3-border"   style="width:25%;height:200px;">
+			<p>Console out</p>
+			<button  >Send Command</button> 
+            <input   type="text" >
+			 
+		  </div>
+	  </div>
+  
+
    </div>
 <!------------------------------------------------------------------------------>      
 </div>   
@@ -326,8 +382,30 @@ The Director of the Institute is Professor Albert Yeap.</p>
 
   </div>
   <div class="w3-black w3-container w3-half">
-     <h2  style="color:rgb(240, 125, 0);" >About AlBot</h2>
-	<p>This is my footer</p>
+     <h2  style="color:rgb(240, 125, 0);" >About AlBot</h2><p><br></p> 
+	<p>Albot project is the project designed for implementing Dr. Albert Cognitive mapping theory on the Actec Firefly  Hexacopter drone.
+	Cognitive maps are a natural cognition of many species to understand spatial environmental and utilized it to orientation and localization purposeDr. 
+	Albert  Cognitive mapping theory is the Computational approach base on learning of empiricalobservation base on the relation of successive View s model. Similar to many species which they observed and  remember snapshots
+	(important object of 2D images) of a place and use them as part of their navigation strategy and special localization
+	</p><p>Hardware comprised of one set of autopilot platform which is connected to the auxiliary system on module (SoM) 
+	by serial link. Due to a huge amount of image processing   Raspberry pi 4 with 4 GB RAM has been selected. 
+	Primarily attitude control and stabilization perform by onboard autopilot and all navigation and compensation performed
+	by high-level API programTechnical Information & specification about
+	this UAV located here<a href="http://wiki.asctec.de/display/AR/AscTec+Firefly"> here </a></p>
+	<p>
+	The core program consists three coroutines and one sub coroutine, first is the webserver which served the web application and 
+	broadcast data/video link through the local network, the second coroutine is the OpenCV module which is responsible to processing 
+	images captured by two HD camera for object detection, optical flow stabilization. The third coroutine is ROS platform 
+	responsible to acquire data from a physical sensor (LiDAR, ToF range finder, ultrasonic) and delivered to TensorFlow node.
+	TensorFlow-Keras is the sub coroutine for data acquisition, Semantic Segmentation and classifies structured data(object )
+	into the feature columns. Those datasets comprise the primary simple objects such as vertical-horizontal lines (door, wall, windows, table) 
+	and complex objects (obstacles, hazardous area, routes)
+	</p>
+	<p>
+	The final mission comprises flying autonomously and recognize the special environment and learn important object  and used this acquired knowledge for  map surveying and route creation  
+This page is the web application of drone control panel. All autopilot data and image processing are streaming to this webpage. for more information visit project GitHub  page at<a href="https://github.com/mkeyno/KeynoRobot"> here </a> 
+	
+	</p>
   </div>
 </div> 
 </footer>

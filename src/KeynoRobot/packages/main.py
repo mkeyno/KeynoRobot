@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-import logging,os,asyncio,cv2,aiohttp_jinja2,jinja2,aiofiles,json, threading,dotenv,argparse,aiohttp,aiohttp_session 
-
+import logging,os,asyncio,cv2,aiojobs,aiofiles,json, threading,dotenv,argparse,aiohttp,aiohttp_session ,time,serial_asyncio
+ 
 from aiohttp         import web, MultipartWriter
 from queue           import Queue
 from aiohttp.web     import middleware
 from objbrowser      import browse
+from aiojobs.aiohttp import setup, spawn
 
 
+# logging.basicConfig(format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
+# logger = logging.getLogger('async')
+# logger.setLevel(logging.DEBUG)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(filename="firefly.log",level=logging.DEBUG)
 #logging.basicConfig(level=getattr(logging, args.log))
-INDEX_File=os.path.join(os.path.dirname(__file__), 'index.html'); print(INDEX_File)
-LOGIN_File=os.path.join(os.path.dirname(__file__), 'login.html'); print(LOGIN_File)
-STATIC_DIR=os.path.join(os.path.dirname(__file__), 'static');print(STATIC_DIR)
+INDEX_File=os.path.join(os.path.dirname(__file__), 'index.html'); logging.debug(INDEX_File)
+LOGIN_File=os.path.join(os.path.dirname(__file__), 'login.html'); logging.debug(LOGIN_File)
+STATIC_DIR=os.path.join(os.path.dirname(__file__), 'static');logging.debug(STATIC_DIR)
 
-GlobalWS=None
+WSID=0
+ 
 IsAucheticated = False
 VERBOSE_DEBUG = False
 DEFAULT_LOG_LEVEL = "INFO"
@@ -39,17 +44,62 @@ def get_args():
     args = parser.parse_args()
     return args
 
+class VideoCaptureThreading:
+    def __init__(self, src=0, width=640, height=480):
+        self.src = src
+        self.cap = cv2.VideoCapture(self.src)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.grabbed, self.frame = self.cap.read()
+        self.started = False
+        self.read_lock = threading.Lock()
+
+    def set(self, var1, var2):
+        self.cap.set(var1, var2)
+
+    def start(self):
+        if self.started:
+            print('[!] Threaded video capturing has already been started.')
+            return None
+        self.started = True
+        self.thread = threading.Thread(target=self.update, args=())
+        self.thread.start()
+        return self
+
+    def update(self):
+        while self.started:
+            grabbed, frame = self.cap.read()
+            with self.read_lock:
+                self.grabbed = grabbed
+                self.frame = frame
+
+    def read(self):
+        with self.read_lock:
+            frame = self.frame.copy()
+            grabbed = self.grabbed
+        return grabbed, frame
+
+    def stop(self):
+        self.started = False
+        self.thread.join()
+
+    def __exit__(self, exec_type, exc_value, traceback):
+        self.cap.release()
+
 class VideoCamera(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         """""";        logging.basicConfig(level=logging.INFO,format='[%(levelname)s] (%(threadName)-10s) %(message)s',)
         self._raw_channel = Queue()
-        self.video = cv2.VideoCapture(0);print("start camera")
+        self.video = cv2.VideoCapture(0);logging.debug("start camera");print("start camera")
         self.encode_param = (int(cv2.IMWRITE_JPEG_QUALITY), 90)
 
     def __del__(self):
-        self.video.release()
+        self.video.release();print("video.release")
 
+    def delete(self):
+        self.video.release();print("video.release")
+ 
     def get_frame(self):
         success, image = self.video.read()
         # We are using Motion JPEG, but OpenCV defaults to capture raw images,
@@ -58,43 +108,45 @@ class VideoCamera(object):
         try:
             ret, jpeg = cv2.imencode('.jpg', image)
         except Exception as e:
-            print('Exception encoding image ' + str(e))
+            logging.debug('Exception encoding image ' + str(e))
             return None
         #self._raw_channel.put(jpeg)
         return jpeg.tobytes()
     
 @middleware
 async def authorize(request, handler):
-    print("Do Auchetication=",request.path.startswith('/login')) #False
-    session = await aiohttp_session.get_session(request)
-    print("Dsession uid=",session.get('uid'))
-    if (not session.get('uid')) and (not request.path.startswith('/login')):
-        url = request.app.router['login'].url_for()
-        log.debug('redirecting to {}'.format(str(url)))
-        raise web.HTTPFound(url)
-    response = await handler(request)
-    return response
-    
+	print("Do Auchetication=");
+	logging.debug("Do Auchetication=",request.path.startswith('/login')) #False
+	session = await aiohttp_session.get_session(request)
+	logging.debug("Dsession uid=",session.get('uid'))
+	if (not session.get('uid')) and (not request.path.startswith('/login')):
+		url = request.app.router['login'].url_for()
+		log.debug('redirecting to {}'.format(str(url)))
+		raise web.HTTPFound(url)
+	response = await handler(request)
+	return response
+	
 def redirect(request, router_name):
-    url = request.app.router[router_name].url_for()
-    print("redirect url =",url) #False
-    log.debug('redirecting to {}'.format(url))
-    raise web.HTTPFound(url)
+	print("redirect");
+	url = request.app.router[router_name].url_for()
+	logging.debug("redirect url =",url) #False
+	log.debug('redirecting to {}'.format(url))
+	raise web.HTTPFound(url)
 
 '''middleware redirects to Login in case there is no 'uid' found in the request's session'''
 class Login(web.View):
-    async def get(self):
-        session = await get_session(self.request)
-        uid = 'user{0}'.format(random.randint(1, 1001))
-        uids = self.request.app['uids']
-        while uid in uids:
-            uid = 'user{0}'.format(random.randint(1, 1001))
-        uids.append(uid)
-        self.request.app['uids'] = uids
-        session['uid'] = uid
-        log.debug(uid)
-        redirect(self.request, '/')
-WSID=0
+	async def get(self):
+		session = await get_session(self.request)
+		uid = 'user{0}'.format(random.randint(1, 1001))
+		uids = self.request.app['uids']
+		while uid in uids:
+			uid = 'user{0}'.format(random.randint(1, 1001))
+		uids.append(uid)
+		self.request.app['uids'] = uids
+		session['uid'] = uid
+		log.debug(uid)
+		redirect(self.request, '/')
+
 
 class WSClient(object):
     
@@ -103,7 +155,7 @@ class WSClient(object):
         self.id = WSID
         self.ws = ws
         WSID+=1
-    
+	
     async def send(self,msg):
          await self.ws.send_str(msg)
 
@@ -116,10 +168,10 @@ class WSHandler:
         await ws.prepare(request)
         client = WSClient(ws)
         self.ws_list.add(client)
-        print('Websocket connection ready')
-        print('Total clients: ' + str(len(self.ws_list)))
+        logging.debug('Websocket connection ready')
+        logging.debug('Total clients: ' + str(len(self.ws_list)))
         for c in self.ws_list:
-            print( c.ws,c.id )
+            logging.debug( c.ws,c.id )
         #await self._send_user_list()
         async for msg in ws:
           if msg.type == aiohttp.WSMsgType.TEXT:
@@ -127,17 +179,17 @@ class WSHandler:
               parsing(Income) #message = msg.json()#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
               await ws.send_str("than yoooooooooooooou")#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         self.ws_list.remove(client)
-        print("Removing... " + str(len(self.ws_list)))
+        logging.debug("Removing... " + str(len(self.ws_list)))
         return ws
 
     async def _send_user_list(self):
         token = [c.id for c in self.ws_list if c.id]
         for c in self.ws_list:
-            await c.ws.send_str('LIST*{}'.format(token));print('we send LIST*{}'.format(token) )
+            await c.ws.send_str('LIST*{}'.format(token));logging.debug('we send LIST*{}'.format(token) )
         return
 
 async def uploadFile(request):
-
+    print("uploadFile");
     reader = await request.multipart()
     # /!\ Don't forget to validate your inputs /!\
     # reader.next() will `yield` the fields of your form
@@ -161,13 +213,15 @@ async def uploadFile(request):
     return web.Response(text='{} sized of {} successfully stored'''.format(filename, size))
 
 async def mjpeg_handler(request):
+    print("camera mjpeg_handler");logging.debug("camera mjpeg_handler")
     boundary = "boundarydonotcross";
-    camera = VideoCamera()
+    request.app['camera']=camera = VideoCamera()
+    
     response = web.StreamResponse(status=200, reason='OK', headers={'Content-Type': 'multipart/x-mixed-replace; ''boundary=--%s' % boundary,})
-    print("just once mjpeg_handler")
+    logging.debug("just once mjpeg_handler StreamResponse")
     await response.prepare(request)    
     while True:
-        frame = camera.get_frame();#print("get_frame")
+        frame = camera.get_frame();#logging.debug("get_frame")
         if frame is None:
             camera = VideoCamera()
             frame = camera.get_frame()
@@ -177,125 +231,200 @@ async def mjpeg_handler(request):
         with MultipartWriter('image/jpeg', boundary=boundary) as mpwriter:
             mpwriter.append(frame, {'Content-Type': 'image/jpeg'})
             await mpwriter.write(response, close_boundary=False)
-        #camera.logger.info('Number of processed images in the queue: {}'.format(response))
+        #logging.debug('Number of processed images in the queue: {}'.format(response))
         await response.drain()
+    print("Exit camera mjpeg_handler");logging.debug("Exit camera mjpeg_handler")
     return response
 
+# async def startcamera(request):
+	# scheduler = await aiojobs.create_scheduler()
+	# await scheduler.spawn(mjpeg_handler(request))
+	
+async def stopcamera(request):
+	print("stocamera")
+	camera=request.app['camera']
+	await camera.delete()
+	return response
+	
+	
+
 def parsing(data):
-    print(">>>>>>>",data)
-    
+    print("parsing websocket");
+    logging.debug(">>>>>>>",data);print(">>>>>>>",data)
+	
 async def websocket_handler(request):
-    global GlobalWS
-    print("this is another one ",GlobalWS)
-    if GlobalWS != None:
-        print("                      can not ")
+    
+     
+    print("websocket_handler");
+    logging.debug("this is another one= ",request.app["GlobalWS"])
+    if request.app["GlobalWS"] != None:
+        logging.debug("                      can not ")
         return
     logging.debug('Websocket connection starting')
     if VERBOSE_DEBUG:
-      logging.debug(
-                "method={},host={},path={},headers={},transport={},cookies={}"
-                .format(
-                  request.method,
-                  request.host,
-                  request.path,
-                  request.headers,
-                  request.transport,
-                  request.cookies,
-                ))
-    #clientIP = request.headers['X-Forwarded-For']
+         str="method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
+         logging.debug(str);print(str)#clientIP = request.headers['X-Forwarded-For']
     """
     ws_ready = ws.can_prepare(request)#checks for request data to figure out if websocket can be started on the request.
     if not ws_ready.ok:        
         return aiohttp_jinja2.render_template('index.html', request, data2html) #put data in html and send to client
 """
-    #hash      = request.match_info["hash"];print("equest.match_info[hash]=",hash)
+    #hash      = request.match_info["hash"];logging.debug("equest.match_info[hash]=",hash)
     #logging.debug("Client Request from {}".format(clientIP))  
-    #if not XXXXX:
+	#if not XXXXX:
     #    raise web.HTTPNotFound(text="folder was deleted or never existed")
-    GlobalWS = web.WebSocketResponse()
-
-    await GlobalWS.prepare(request)
-    request.app["websockets"].add(GlobalWS)
-    #print(app["websockets"])
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+    request.app["GlobalWS"]=1000
+    #logging.debug(app["GlobalWS"])
     logging.debug('-------------------------------Websocket connection ready-----------------------------')
 
-    async for msg in GlobalWS:
+    async for msg in ws:
         #logging.debug(msg)
         if msg.type == aiohttp.WSMsgType.TEXT:
             Income=msg.data;
             parsing(Income) #message = msg.json()#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-            await GlobalWS.send_str("than yoooooooooooooou")#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            await ws.send_str("than yoooooooooooooou")#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    logging.debug('Websocket connection closed')
-    request.app["websockets"].remove(GlobalWS)
-    GlobalWS=None
-    return GlobalWS
-    
+    logging.debug('Websocket connection closed');print('Websocket connection closed')
+    request.app["GlobalWS"]=None;#.remove(ws)
+ 
+    return ws
+	
 async def websockets_clear(app):
+    print("websockets_clear");
     for ws in app['websockets']:
         await ws.close()
     app['websockets'].clear()
 
 async def index(request):
-    print("index simple handler")
+    logging.debug("index simple handler")
     return web.Response(text='<div><img src="/imageH"  /></div><p> video </p><div><img src="/imageV"  /></div>', content_type='text/html')
 
 async def handle_index_page(request):
-    print("index handler",request.query.get('psw'))#  #password = None " url=",request.app.router['login'].url_for());#  print(request.headers)  
+    print("IsAucheticated = ?")
+    global IsAucheticated
+    if not IsAucheticated:
+       print("IsAucheticated = False")
+       return await handle_login_page(request)
+    print("handle_index_page");
+    if VERBOSE_DEBUG:
+         str="index_page method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
+         logging.debug(str);print(str)#clientIP = request.headers['X-Forwarded-For']  #password = None " url=",request.app.router['login'].url_for());#  logging.debug(request.headers)  
     async with aiofiles.open(INDEX_File, mode='r') as index_file:
         index_contents = await index_file.read()
     return web.Response(text=index_contents, content_type='text/html')
 
 async def handle_login_page(request):
-    print("login handler",request.app["psw"])#," url=",request.app.router['login'].url_for());#  print(request.headers)  
+    print("handle_login_page");
+    if VERBOSE_DEBUG:
+         str="login_page method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
+         logging.debug(str);print(str)
     async with aiofiles.open(LOGIN_File, mode='r') as index_file:
         index_contents = await index_file.read()
     return web.Response(text=index_contents, content_type='text/html')
 async def handle_authenticate(request):
-    #redirect(request, '/')
+    print("handle_authenticate");
+    global IsAucheticated
+    if VERBOSE_DEBUG:
+         str="authenticate method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
+         logging.debug(str);print(str)
     data=await request.post() #<MultiDictProxy('uname': 'xxx', 'psw': 'c', 'remember': 'on')>
     #user=data.get('uname');password=data.get('psw')
     user = data['uname'];  password = data['psw']
-    # for key,val in data.items():
-       # print(key, "=>", val)
     print("username =",user," password =",password ) 
+    if user=="admin" and password=="admin":
+       IsAucheticated = True
+       logging.debug("login successful");print("login successful")       
+       return await handle_index_page(request)
+    else :
+       logging.debug("login failed");print("login failed")
+       return await handle_login_page(request)
+    # for key,val in data.items():
+       # logging.debug(key, "=>", val)
     #browse(locals(), 'locals()')
-    return await handle_index_page(request)
-    
-    
+
+async def serialRead(f):
+    print("read serialRead")
+    while True:
+      print("read data")
+      await asyncio.sleep(1/f);
+ 
 async def setup_server(loop, address, port):
     app = web.Application(loop=loop)
     app.router.add_route('GET', "/login", handle_login_page) #login?uname=asd&psw=asd&remember=on 
-    app.router.add_route('POST', "/authenticate", handle_authenticate)
+    app.router.add_route('POST', "/", handle_authenticate)
     app.router.add_route('GET', "/", handle_index_page)
     app.router.add_static('/static/', path=STATIC_DIR, name='static')
-    app.router.add_route('GET', "/imagezH", mjpeg_handler)
-    app.router.add_route('GET', "/imagezV", mjpeg_handler)
-    wshandler = WSHandler()
+    app.router.add_route('GET', "/image", mjpeg_handler)
+    app.router.add_route('GET', "/stopcamera", stopcamera)
+    #wshandler = WSHandler()
     #app.router.add_get('/ws', wshandler.ws_handler)
     app.router.add_route('GET', '/ws', websocket_handler)
-    app["websockets"] = set()
-    app['uids'] = [] 
+    app["GlobalWS"] = None
+    app['camera'] = None 
     app['psw'] = 'admin';app['uname'] = 'admin'
     app.on_shutdown.append(websockets_clear)
     app["threads"] = threading.Event()
     app["arg"] = get_args()
     # app.middlewares.append(authorize)
-    #print(app.router['login'].url_for())
+    #logging.debug(app.router['login'].url_for())
     #aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(STATIC_DIR))
-    
+	
     # for name, resource in app.router.named_resources().items():
-      # print("Name of resource:",name,"R=", resource)
+      # logging.debug("Name of resource:",name,"R=", resource)
+    print("setup_server done");
     return await loop.create_server(app.make_handler(), address, port)
 
+"""
+Calling a coroutine function   returns a coroutine object.
+To execute a coroutine object,  use   await in front of it, or                                   await coroObj                             await asyncio.sleep(10)
+                                      schedule it with ensure_future() or                                             asyncio.ensure_future(coroObj),asyncio.ensure_future(coro_function("example.com"))
+									  create_task()                               asyncio.get_event_loop().create_task(coro_function("example.com"))
+
+future  is callable coroObj                                                       future = loop.create_future(), future.add_done_callback(fn)
+																				  future = loop.create_task(coroutine)
+																				  future = asyncio.ensure_future(coroutine[, loop=loop])
+																				  
+use an event loop in the main thread													loop = asyncio.get_event_loop()	
+run an event loop in another thread						  							loop = asyncio.new_event_loop()    asyncio.set_event_loop(loop)
+
+
+loop.run_until_complete(<future or coroutine>).
+loop.run_until_complete(asyncio.wait([      ]))
+loop.run_until_complete(asyncio.gather(                                                                ))
+loop.run_until_complete(asyncio.gather(helloworld(), asyncio.sleep(2)))                run a co-routine repeatedly for 2 seconds
+
+to add a function to an already running event loop       asyncio.ensure_future(my_coro())
+
+async def corotinglist():
+    await asyncio.gather( coro2(), coro2() )
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(corotinglist())
+"""
+
 def server_begin():
+    ip='0.0.0.0';port=8080
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(setup_server(loop, '0.0.0.0', 8080))
-    print("Server ready!")
+    #loop.run_until_complete(setup_server(loop, ip,port ))
+	
+    # subtasks = []
+    # subtasks.append(asyncio.Task(serialRead(50)))
+    # subtasks.append(asyncio.Task(setup_server(loop, ip,port )))
+    # loop.run_until_complete(asyncio.gather(*subtasks))
+	
+    #t1=asyncio.create_task(serialRead())
+    #t2=asyncio.create_task(setup_server(loop, ip,port ))
+    # Submit the coroutine to a given loop
+    future = asyncio.run_coroutine_threadsafe(serialRead(1)              , loop)
+    future = asyncio.run_coroutine_threadsafe(setup_server(loop, ip,port ), loop)
+    #coro = serial_asyncio.create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
+    logging.debug("Server ready!");print("Server ready!",ip,port)
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        print("Shutting Down!")
+        logging.debug("Shutting Down!");print("Shutting Down!")
         loop.close()
 
 if __name__ == '__main__':
