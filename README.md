@@ -22,7 +22,11 @@ The final mission comprises flying autonomously and recognize the special enviro
 ### Hardware
 Hardware comprised of one set of autopilot platform which is connected to the auxiliary system on module (SoM) by serial link. Due to a huge amount of image processing   Raspberry pi 4 with 4 GB RAM has been selected. Primarily attitude control and stabilization perform by onboard autopilot and all navigation and compensation performed by high-level API programTechnical Information & specification about this UAV located![ here ]( http://wiki.asctec.de/display/AR/AscTec+Firefly)
 ### Firmware 
-The core program consists three coroutines and one sub coroutine, first is the webserver which served the web application and broadcast data/video link through the local network, the second coroutine is the OpenCV module which is responsible to processing images captured by two HD camera for object detection, optical flow stabilization. The third coroutine is ROS platform responsible to acquire data from a physical sensor (LiDAR, ToF range finder, ultrasonic) and delivered to TensorFlow node. TensorFlow-Keras is the sub coroutine for data acquisition, Semantic Segmentation and classifies structured data(object ) into the feature columns. Those datasets comprise the primary simple objects such as vertical-horizontal lines (door, wall, windows, table) and complex objects (obstacles, hazardous area, routes)
+The core program consists three coroutines and one sub coroutine, 
+- first is the webserver which served the web application and broadcast data/video link through the local network, 
+- second coroutine is the OpenCV module which is responsible to processing images captured by two HD camera for object detection, optical flow stabilization. 
+- third coroutine is ROS platform responsible to acquire data from a physical sensor (LiDAR, ToF range finder, ultrasonic) and delivered to TensorFlow node. 
+  * TensorFlow-Keras is the sub coroutine for data acquisition, Semantic Segmentation and classifies structured data(object ) into the feature columns. Those datasets comprise the primary simple objects such as vertical-horizontal lines (door, wall, windows, table) and complex objects (obstacles, hazardous area, routes)
 
  ![-](https://github.com/mkeyno/Small-Raspberry-Picker-Robot/blob/master/resources/python.jpg) 
  ![-](https://github.com/mkeyno/Small-Raspberry-Picker-Robot/blob/master/resources/ros.jpg) 
