@@ -21,7 +21,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=("tests",)),
     install_requires=[
           'numpy',
-          'cv2',
+          'opencv-python',
 		  'logging','os','asyncio','tensorflow','aiojobs','aiofiles',
 		  'json','dotenv','aiohttp','aiohttp_session' ,'serial_asyncio',
       ],

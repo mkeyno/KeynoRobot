@@ -12,7 +12,7 @@ from aiojobs.aiohttp import setup, spawn
 # logger = logging.getLogger('async')
 # logger.setLevel(logging.DEBUG)
 
-logging.basicConfig(filename="firefly.log",level=logging.DEBUG)
+logging.basicConfig(filename="firefly.log",filemode='w',level=logging.DEBUG)
 #logging.basicConfig(level=getattr(logging, args.log))
 INDEX_File=os.path.join(os.path.dirname(__file__), 'index.html'); logging.debug(INDEX_File)
 LOGIN_File=os.path.join(os.path.dirname(__file__), 'login.html'); logging.debug(LOGIN_File)
@@ -213,28 +213,45 @@ async def uploadFile(request):
     return web.Response(text='{} sized of {} successfully stored'''.format(filename, size))
 
 async def mjpeg_handler(request):
-    print("camera mjpeg_handler");logging.debug("camera mjpeg_handler")
-    boundary = "boundarydonotcross";
-    request.app['camera']=camera = VideoCamera()
-    
-    response = web.StreamResponse(status=200, reason='OK', headers={'Content-Type': 'multipart/x-mixed-replace; ''boundary=--%s' % boundary,})
-    logging.debug("just once mjpeg_handler StreamResponse")
-    await response.prepare(request)    
-    while True:
-        frame = camera.get_frame();#logging.debug("get_frame")
-        if frame is None:
-            camera = VideoCamera()
-            frame = camera.get_frame()
-        ##################   object detection  #########################
-#       frame=object_detection(frame)
-        ##############################################################
-        with MultipartWriter('image/jpeg', boundary=boundary) as mpwriter:
-            mpwriter.append(frame, {'Content-Type': 'image/jpeg'})
-            await mpwriter.write(response, close_boundary=False)
-        #logging.debug('Number of processed images in the queue: {}'.format(response))
-        await response.drain()
-    print("Exit camera mjpeg_handler");logging.debug("Exit camera mjpeg_handler")
-    return response
+	print("mjpeg_handler=",request.url);
+	#browse(locals(), 'locals()')
+	#param1=request.get('client');
+	com = request.rel_url.query['com'];  print("com=",com)
+	if com=='start':
+		# param2 = request.rel_url.query['age']
+		# result = "name: {}, age: {}".format(param1, param2)
+		
+		boundary = "boundarydonotcross";
+		responseImage = web.StreamResponse(status=200, reason='OK', headers={'Content-Type': 'multipart/x-mixed-replace; ''boundary=--%s' % boundary,})
+		#responseImage.content_type = 'multipart/x-mixed-replace;boundary=ffserver'
+		await responseImage.prepare(request) #Send HTTP header. You should not change any header data after calling this method.
+		VC = cv2.VideoCapture(0);
+		request.app["camera"]=VC
+		encode_param = (int(cv2.IMWRITE_JPEG_QUALITY), 90)
+		request.app["streaming"].add(responseImage)
+		while True:
+			try:
+				_, frame = VC.read(); #await
+				if frame is None:
+					  break
+				with MultipartWriter('image/jpeg', boundary=boundary) as mpwriter:
+					result, encimg = cv2.imencode('.jpg', frame, encode_param)
+					data = encimg.tostring()
+					mpwriter.append(data, {'Content-Type': 'image/jpeg'})
+					await mpwriter.write(responseImage, close_boundary=False);print("next frame");
+				await asyncio.sleep(0.010)#await responseImage.drain()
+				
+			except asyncio.CancelledError as e:
+				request.app["streaming"].remove(responseImage);request.app["camera"].remove(VC)
+				print("Exit camera mjpeg_handler");
+				VC.shutdown();
+		return responseImage
+	else :
+		print("streaming_clear",request.app["camera"]);
+		if request.app["camera"] is not None:
+			request.app["camera"].release();
+		return web.Response();#return HTTPNotFound(text='No file found')
+		#await shut_down(request)
 
 # async def startcamera(request):
 	# scheduler = await aiojobs.create_scheduler()
@@ -292,10 +309,11 @@ async def websocket_handler(request):
     return ws
 	
 async def websockets_clear(app):
-    print("websockets_clear");
-    for ws in app['websockets']:
-        await ws.close()
-    app['websockets'].clear()
+	print("websockets_clear");
+	for ws in app['websockets']:
+		await ws.close()
+	app['websockets'].clear()
+	app['streaming'].clear();app["camera"].clear();print("streaming_clear done");
 
 async def index(request):
     logging.debug("index simple handler")
@@ -316,7 +334,7 @@ async def handle_index_page(request):
     return web.Response(text=index_contents, content_type='text/html')
 
 async def handle_login_page(request):
-    print("handle_login_page");
+    #print("handle_login_page=",request.url_for());
     if VERBOSE_DEBUG:
          str="login_page method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
          logging.debug(str);print(str)
@@ -351,30 +369,31 @@ async def serialRead(f):
       await asyncio.sleep(1/f);
  
 async def setup_server(loop, address, port):
-    app = web.Application(loop=loop)
-    app.router.add_route('GET', "/login", handle_login_page) #login?uname=asd&psw=asd&remember=on 
-    app.router.add_route('POST', "/", handle_authenticate)
-    app.router.add_route('GET', "/", handle_index_page)
-    app.router.add_static('/static/', path=STATIC_DIR, name='static')
-    app.router.add_route('GET', "/image", mjpeg_handler)
-    app.router.add_route('GET', "/stopcamera", stopcamera)
-    #wshandler = WSHandler()
-    #app.router.add_get('/ws', wshandler.ws_handler)
-    app.router.add_route('GET', '/ws', websocket_handler)
-    app["GlobalWS"] = None
-    app['camera'] = None 
-    app['psw'] = 'admin';app['uname'] = 'admin'
-    app.on_shutdown.append(websockets_clear)
-    app["threads"] = threading.Event()
-    app["arg"] = get_args()
-    # app.middlewares.append(authorize)
-    #logging.debug(app.router['login'].url_for())
-    #aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(STATIC_DIR))
+	app = web.Application(loop=loop)
+	app.router.add_route('GET', "/login", handle_login_page) #login?uname=asd&psw=asd&remember=on 
+	app.router.add_route('POST', "/", handle_authenticate)
+	app.router.add_route('GET', "/", handle_index_page)
+	app.router.add_static('/static/', path=STATIC_DIR, name='static')
+	app.router.add_route('GET', "/image", mjpeg_handler)
+	app.router.add_route('GET', "/stopcamera", stopcamera)
+	#wshandler = WSHandler()
+	#app.router.add_get('/ws', wshandler.ws_handler)
+	app.router.add_route('GET', '/ws', websocket_handler)
+	app["GlobalWS"] = None
+	app['camera'] = None 
+	app["streaming"] = set()
+	app['psw'] = 'admin';app['uname'] = 'admin'
+	app.on_shutdown.append(websockets_clear)
+	app["threads"] = threading.Event()
+	app["arg"] = get_args()
+	# app.middlewares.append(authorize)
+	#logging.debug(app.router['login'].url_for())
+	#aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(STATIC_DIR))
 	
-    # for name, resource in app.router.named_resources().items():
-      # logging.debug("Name of resource:",name,"R=", resource)
-    print("setup_server done");
-    return await loop.create_server(app.make_handler(), address, port)
+	# for name, resource in app.router.named_resources().items():
+	# logging.debug("Name of resource:",name,"R=", resource)
+	print("setup_server done");
+	return await loop.create_server(app.make_handler(), address, port)
 
 """
 Calling a coroutine function   returns a coroutine object.
@@ -429,3 +448,32 @@ def server_begin():
 
 if __name__ == '__main__':
     server_begin()
+	
+	
+"""
+Calling a coroutine function   returns a coroutine object.
+To execute a coroutine object,  use   await in front of it, or                                   await coroObj                             await asyncio.sleep(10)
+                                      schedule it with ensure_future() or                                             asyncio.ensure_future(coroObj),asyncio.ensure_future(coro_function("example.com"))
+									  create_task()                               asyncio.get_event_loop().create_task(coro_function("example.com"))
+
+future  is callable coroObj                                                       future = loop.create_future(), future.add_done_callback(fn)
+																				  future = loop.create_task(coroutine)
+																				  future = asyncio.ensure_future(coroutine[, loop=loop])
+																				  
+use an event loop in the main thread													loop = asyncio.get_event_loop()	
+run an event loop in another thread						  							loop = asyncio.new_event_loop()    asyncio.set_event_loop(loop)
+
+
+loop.run_until_complete(<future or coroutine>).
+loop.run_until_complete(asyncio.wait([      ]))
+loop.run_until_complete(asyncio.gather(                                                                ))
+loop.run_until_complete(asyncio.gather(helloworld(), asyncio.sleep(2)))                run a co-routine repeatedly for 2 seconds
+
+to add a function to an already running event loop       asyncio.ensure_future(my_coro())
+
+async def corotinglist():
+    await asyncio.gather( coro2(), coro2() )
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(corotinglist())
+"""

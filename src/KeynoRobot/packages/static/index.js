@@ -1,4 +1,6 @@
 
+
+
 function check_WS(){//if(!_Connection ||
   // document.getElementById('_link').value= _Connection.readyState;
       if(  _Connection.readyState == 3 ) {document.getElementById('_link').style.backgroundColor ="#FFA500"; ini_ws();}
@@ -20,7 +22,34 @@ setInterval(check_WS, 500);
  function parsing(_income)
  {
  }
- 
+
+function cameraLeft(id){
+	var s=document.getElementById(id).value;/*
+   if(s=='Open Camera') 
+   {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "/image", true ); // false for synchronous request
+    xmlHttp.responseType = 'blob';
+	xhr.onload = function(e) 
+	{
+	  if (this.status == 200) {
+								var blob = this.response;
+								var img = document.getElementById('cameraLeft')
+								img.onload = function(e) { window.URL.revokeObjectURL(img.src);};
+								img.src = window.URL.createObjectURL(blob);
+								document.body.appendChild(img);
+							  }
+     };
+	xmlHttp.send(  );
+	document.getElementById(id).value='Close Camera';
+   } */
+    if(s=='Open Camera') {document.getElementById('cameraLeft').src="http://"+location.host+"/image?com=start";
+                          document.getElementById(id).value='Close Camera';}
+	else                 {document.getElementById('cameraLeft').src="http://"+location.host+"/image?com=stop"; 
+						  document.getElementById(id).value='Open Camera';}
+          document.getElementById('imagecam').src="http://"+location.host+"/image?com=start"
+}
+ function cameraRight(id){ }
 function Pitch2HUD(pitch){ 
 	document.getElementById('myTable').rows[1].cells[1].innerHTML=pitch;
 	document.getElementById('horizon1').style.top=document.getElementById('horizon').style.top =(parseInt(pitch)-75)*2+"%";

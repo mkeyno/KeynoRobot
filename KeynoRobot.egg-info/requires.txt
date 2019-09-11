@@ -1,0 +1,13 @@
+numpy
+cv2
+logging
+os
+asyncio
+tensorflow
+aiojobs
+aiofiles
+json
+dotenv
+aiohttp
+aiohttp_session
+serial_asyncio

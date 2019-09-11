@@ -1,0 +1,10 @@
+README.md
+setup.cfg
+setup.py
+KeynoRobot.egg-info/PKG-INFO
+KeynoRobot.egg-info/SOURCES.txt
+KeynoRobot.egg-info/dependency_links.txt
+KeynoRobot.egg-info/requires.txt
+KeynoRobot.egg-info/top_level.txt
+test/__init__.py
+test/test.py
