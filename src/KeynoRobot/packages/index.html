@@ -260,9 +260,14 @@ window.onload = function ()
  
  
 				<p>Console in</p>
-			<button  >Clear Console</button> 
+			<button onclick="clear_console();return false;" >Clear Console</button> 
+			<script>
+				function clear_console() {
+				document.getElementById("recieve_dats").value=""
+				}
+				</script>
  
-			<textarea name="TextArea1" id="sim_tb" style="width:100%;"  > </textarea>
+			<textarea name="TextArea1" id="recieve_dats" style="width:100%;"  > </textarea>
 		  </div>
 		  <div class="w3-col w3-container   "  style="width:50%">
 				
@@ -281,8 +286,8 @@ window.onload = function ()
 		  </div>
 		  <div class="w3-col w3-container w3-border"   style="width:25%;height:200px;">
 			<p>Console out</p>
-			<button  >Send Command</button> 
-            <input   type="text" >
+			<button onclick="send_command();return false;"  >Send Command</button> 
+            <input id="send_command_value"  type="text" >
 			 
 		  </div>
 	  </div>

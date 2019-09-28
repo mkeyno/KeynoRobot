@@ -19,7 +19,8 @@ LOGIN_File=os.path.join(os.path.dirname(__file__), 'login.html'); logging.debug(
 STATIC_DIR=os.path.join(os.path.dirname(__file__), 'static');logging.debug(STATIC_DIR)
 
 WSID=0
- 
+GlobalAPP=GlobalWS=None
+
 IsAucheticated = False
 VERBOSE_DEBUG = False
 DEFAULT_LOG_LEVEL = "INFO"
@@ -147,7 +148,6 @@ class Login(web.View):
 		log.debug(uid)
 		redirect(self.request, '/')
 
-
 class WSClient(object):
     
     def __init__(self, ws):
@@ -168,24 +168,30 @@ class WSHandler:
         await ws.prepare(request)
         client = WSClient(ws)
         self.ws_list.add(client)
-        logging.debug('Websocket connection ready')
-        logging.debug('Total clients: ' + str(len(self.ws_list)))
+        print('Websocket connection ready')
+        print('Total clients: ' , self.ws_list, str(len(self.ws_list)))
+		#Total clients:{<__main__.WSClient object at 0xF28>, <__main__.WSClient object at 0x630>, <__main__.WSClient object at 0xD58F6D8>} 3
         for c in self.ws_list:
-            logging.debug( c.ws,c.id )
-        #await self._send_user_list()
-        async for msg in ws:
+            print( c.ws,c.id )
+			#<WebSocketResponse Switching Protocols GET /ws > 1
+			#<WebSocketResponse Switching Protocols GET /ws > 0
+			#<WebSocketResponse Switching Protocols GET /ws > 2
+        await self._send_user_list()
+		#loop---------
+        async for msg in ws:  
           if msg.type == aiohttp.WSMsgType.TEXT:
               Income=msg.data;
-              parsing(Income) #message = msg.json()#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-              await ws.send_str("than yoooooooooooooou")#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              parsing(Income) #message = msg.json()
+              await ws.send_str("got your message website")
+		#---------loop
         self.ws_list.remove(client)
-        logging.debug("Removing... " + str(len(self.ws_list)))
+        print("Removing... " + str(len(self.ws_list)))
         return ws
 
     async def _send_user_list(self):
         token = [c.id for c in self.ws_list if c.id]
         for c in self.ws_list:
-            await c.ws.send_str('LIST*{}'.format(token));logging.debug('we send LIST*{}'.format(token) )
+            await c.ws.send_str('LIST*{}'.format(token));print('we send LIST*{}'.format(token) )#LIST*[4, 2, 3, 1]
         return
 
 async def uploadFile(request):
@@ -263,50 +269,37 @@ async def stopcamera(request):
 	await camera.delete()
 	return response
 	
-	
 
 def parsing(data):
-    print("parsing websocket");
-    logging.debug(">>>>>>>",data);print(">>>>>>>",data)
+	print("parsing websocket data=",data);#data= <WebSocketResponse Switching Protocols GET /ws >
+	#await GlobalWS.send_str("AKA")
 	
 async def websocket_handler(request):
-    
-     
-    print("websocket_handler");
-    logging.debug("this is another one= ",request.app["GlobalWS"])
-    if request.app["GlobalWS"] != None:
-        logging.debug("                      can not ")
-        return
-    logging.debug('Websocket connection starting')
-    if VERBOSE_DEBUG:
-         str="method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
-         logging.debug(str);print(str)#clientIP = request.headers['X-Forwarded-For']
-    """
-    ws_ready = ws.can_prepare(request)#checks for request data to figure out if websocket can be started on the request.
-    if not ws_ready.ok:        
-        return aiohttp_jinja2.render_template('index.html', request, data2html) #put data in html and send to client
-"""
-    #hash      = request.match_info["hash"];logging.debug("equest.match_info[hash]=",hash)
-    #logging.debug("Client Request from {}".format(clientIP))  
-	#if not XXXXX:
-    #    raise web.HTTPNotFound(text="folder was deleted or never existed")
-    ws = web.WebSocketResponse()
-    await ws.prepare(request)
-    request.app["GlobalWS"]=1000
-    #logging.debug(app["GlobalWS"])
-    logging.debug('-------------------------------Websocket connection ready-----------------------------')
 
-    async for msg in ws:
-        #logging.debug(msg)
-        if msg.type == aiohttp.WSMsgType.TEXT:
-            Income=msg.data;
-            parsing(Income) #message = msg.json()#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-            await ws.send_str("than yoooooooooooooou")#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    logging.debug('Websocket connection closed');print('Websocket connection closed')
-    request.app["GlobalWS"]=None;#.remove(ws)
- 
-    return ws
+	#logging.debug("this is another one= ",request.app["GlobalWS"])
+	if request.app["GlobalWS"] != None:
+		print("             return, this is more than one {} client ".format(GlobalWS))
+		return
+	print('Websocket connection starting')
+
+	ws = web.WebSocketResponse()
+	await ws.prepare(request)
+	request.app["GlobalWS"]=1000
+	logging.debug('------- -----Websocket connection ready------- -----')
+	request.app["websockets"].add(ws)
+	try:		
+		async for msg in ws:
+			# this remain live
+			if msg.type == aiohttp.WSMsgType.TEXT:
+				Income=msg.data;
+				print(Income) 
+				await ws.send_str("send back message:")
+		#check serial
+	#request.app["GlobalWS"]=None;#.remove(ws) 
+	finally:
+		request.app['websockets'].discard(ws)
+	return ws
 	
 async def websockets_clear(app):
 	print("websockets_clear");
@@ -362,14 +355,27 @@ async def handle_authenticate(request):
        # logging.debug(key, "=>", val)
     #browse(locals(), 'locals()')
 
+
+
 async def serialRead(f):
-    print("read serialRead")
-    while True:
-      print("read data")
-      await asyncio.sleep(1/f);
- 
+	print("send serialRead")
+	while True:
+		print("sending......")
+		await send_ws("helo web site ")
+		await asyncio.sleep(1/f);
+
+async def SerialReader(loop):
+		reader,writer = await serial_asyncio.open_serial_connection(url='COM3', baudrate=115200,loop=loop)
+		while True:
+			line = await reader.readline()
+			line = line.decode("utf-8").strip()
+			print(line)
+			for x in GlobalAPP['websockets']:                
+				await x.send_str(line)
+				
 async def setup_server(loop, address, port):
-	app = web.Application(loop=loop)
+	global GlobalAPP
+	GlobalAPP=app = web.Application(loop=loop)
 	app.router.add_route('GET', "/login", handle_login_page) #login?uname=asd&psw=asd&remember=on 
 	app.router.add_route('POST', "/", handle_authenticate)
 	app.router.add_route('GET', "/", handle_index_page)
@@ -380,8 +386,7 @@ async def setup_server(loop, address, port):
 	#app.router.add_get('/ws', wshandler.ws_handler)
 	app.router.add_route('GET', '/ws', websocket_handler)
 	app["GlobalWS"] = None
-	app['camera'] = None 
-	app["streaming"] = set()
+	app['websockets'] = set()
 	app['psw'] = 'admin';app['uname'] = 'admin'
 	app.on_shutdown.append(websockets_clear)
 	app["threads"] = threading.Event()
@@ -392,62 +397,36 @@ async def setup_server(loop, address, port):
 	
 	# for name, resource in app.router.named_resources().items():
 	# logging.debug("Name of resource:",name,"R=", resource)
-	print("setup_server done");
+ 
 	return await loop.create_server(app.make_handler(), address, port)
 
-"""
-Calling a coroutine function   returns a coroutine object.
-To execute a coroutine object,  use   await in front of it, or                                   await coroObj                             await asyncio.sleep(10)
-                                      schedule it with ensure_future() or                                             asyncio.ensure_future(coroObj),asyncio.ensure_future(coro_function("example.com"))
-									  create_task()                               asyncio.get_event_loop().create_task(coro_function("example.com"))
-
-future  is callable coroObj                                                       future = loop.create_future(), future.add_done_callback(fn)
-																				  future = loop.create_task(coroutine)
-																				  future = asyncio.ensure_future(coroutine[, loop=loop])
-																				  
-use an event loop in the main thread													loop = asyncio.get_event_loop()	
-run an event loop in another thread						  							loop = asyncio.new_event_loop()    asyncio.set_event_loop(loop)
-
-
-loop.run_until_complete(<future or coroutine>).
-loop.run_until_complete(asyncio.wait([      ]))
-loop.run_until_complete(asyncio.gather(                                                                ))
-loop.run_until_complete(asyncio.gather(helloworld(), asyncio.sleep(2)))                run a co-routine repeatedly for 2 seconds
-
-to add a function to an already running event loop       asyncio.ensure_future(my_coro())
-
-async def corotinglist():
-    await asyncio.gather( coro2(), coro2() )
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(corotinglist())
-"""
-
 def server_begin():
-    ip='0.0.0.0';port=8080
-    loop = asyncio.get_event_loop()
-    #loop.run_until_complete(setup_server(loop, ip,port ))
-	
-    # subtasks = []
-    # subtasks.append(asyncio.Task(serialRead(50)))
-    # subtasks.append(asyncio.Task(setup_server(loop, ip,port )))
-    # loop.run_until_complete(asyncio.gather(*subtasks))
-	
-    #t1=asyncio.create_task(serialRead())
-    #t2=asyncio.create_task(setup_server(loop, ip,port ))
-    # Submit the coroutine to a given loop
-    future = asyncio.run_coroutine_threadsafe(serialRead(1)              , loop)
-    future = asyncio.run_coroutine_threadsafe(setup_server(loop, ip,port ), loop)
-    #coro = serial_asyncio.create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
-    logging.debug("Server ready!");print("Server ready!",ip,port)
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        logging.debug("Shutting Down!");print("Shutting Down!")
-        loop.close()
+	ip='0.0.0.0';port=8080
+	loop = asyncio.new_event_loop();print("server_begin",loop)	#get_event_loop get_running_loop
+	asyncio.set_event_loop(loop)
+	asyncio.run_coroutine_threadsafe(setup_server(loop, ip,port ), loop)
+	#asyncio.run_coroutine_threadsafe(SerialReader(loop) , loop)
+	print("Server ready!",ip,port)
+	logging.debug("Server ready!");print("Server ready!",ip,port)
+	try:
+		loop.run_forever()
+	except KeyboardInterrupt:
+		logging.debug("Shutting Down!");print("Shutting Down!")
+		loop.close()
+
+def setup_serial():
+	loop = asyncio.new_event_loop();print("setup_serial",loop)	#get_event_loop get_running_loop
+	asyncio.set_event_loop(loop)
+	loop.run_until_complete(SerialReader(loop))
+	loop.run_forever() 
+
 
 if __name__ == '__main__':
-    server_begin()
+
+	main_threads =    threading.Thread(target = server_begin )
+	serial_threads =  threading.Thread(target = setup_serial )
+	main_threads.start() ;	serial_threads.start() ;
+	main_threads.join() ;serial_threads.join()  
 	
 	
 """
