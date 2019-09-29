@@ -1,15 +1,15 @@
 
 
 
-function check_WS(){//if(!_Connection ||
-  // document.getElementById('_link').value= _Connection.readyState;
+function check_WS(){
+	console.log("check_WS"); 
       if(  _Connection.readyState == 3 ) {document.getElementById('_link').style.backgroundColor ="#FFA500"; ini_ws();}
 else  if(  _Connection.readyState == 0 ) {document.getElementById('_link').style.backgroundColor ="#DC143C";  } 
 else  if(  _Connection.readyState == 2 ) {document.getElementById('_link').style.backgroundColor ="#FF0000";  }
   }
 function ini_ws()
 {
-
+console.log(link); 
 _Connection = new WebSocket( link); 
 _Connection.onerror = function (error){document.getElementById('_link').value="Link Broken";  document.getElementById('_link').style.backgroundColor ="#FFA500"; }
 _Connection.close = function (error)  {document.getElementById('_link').value="Disconnected"; document.getElementById('_link').style.backgroundColor ="#FFE4E1";} //gray
@@ -175,3 +175,52 @@ function clicktohide() {
     x.className = x.className.replace(" w3-show", "");
   }
 }
+
+
+
+var startCounting,COUNT=0,setNatural;
+
+function omdMove(type){
+	startCounting=setInterval(function(){
+											COUNT += 50;
+											document.getElementById("outputsend").innerText = COUNT;
+										  }, 100);
+}
+function omuMove(type){
+		
+  clearInterval(startCounting);
+  send_command(type,COUNT);
+  setNatural= setInterval(function(){
+                                     sendcommandandclear(type)
+                                     },150) ; 
+}
+
+function sendcommandandclear(type){
+
+clearInterval(setNatural);
+COUNT = 0;
+document.getElementById("outputsend").innerText = COUNT;
+send_command(type,0);
+}
+
+function send_command(type,COUNT){
+	document.getElementById("send_command_value").value=type+":"+COUNT;
+	  _Connection.send(type+":"+COUNT ) 
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

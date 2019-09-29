@@ -7,33 +7,9 @@
 <script src="./static/index.js"></script>
 <link  href="./static/index.css" rel="stylesheet" type="text/css">
 <script type="text/javascript">  
-/*
-interface Props {
-    pitch: number;
-    roll: number;    
-    heading?: number;
-	
-	airspeed?: number;
-    Altitude?: number;	
-    Thrust?: number;
-	
-	Latitude 
-	Longitude
-	Height
-	
-    Battery?: number;
-	Flight Mode
-	Height Control
-	GPS
-	Serial Interace Enabaled
-	Serial Interace Active
-	Emergency
-}*/
+
 var _Connection;
-//Roll2HUD(0);
-//Yaw2HUD(0);
-//Pitch2HUD(0);
-//var host = window.document.location.host.replace(/:.*/, '');
+
 var link="ws://"+location.host+"/ws";
 window.onload = function ()
   {     
@@ -81,13 +57,13 @@ window.onload = function ()
 <div id="London" class="w3-container city" >
 <div class="w3-row-padding" style="background-color:rgb(255, 255, 255)">
 <!------------------------------------------------------------------------------>
-  <div class="w3-third w3-border"  style="height:720px" > <!--------left pannel--------->
+  <div class="w3-third w3-border"  style="height:760px" > <!--------left pannel--------->
   
-	  <div class="w3-center w3-black"  style="width:100%;height:400px;" >
+	 <div class="w3-center w3-black"  style="width:100%;height:400px;" >
 	   <p>Horizontal Camera</p>
 	    <img id="cameraLeft" src="./static/leftcam.jpg" class="w3-border" alt="Horizontal Camera" style="width:100%; max-height: 350px;"> 	  
 	  </div>
-	    <div class="w3-center w3-container w3-card-4" >
+	 <div class="w3-center w3-container w3-card-4" >
 		  <table style="width:100%;" >
 			  <tr>
 			   <td>dx</td><td>...</td> <td>dy</td><td>...</td> <td>dr</td><td>...</td> 			  
@@ -95,21 +71,26 @@ window.onload = function ()
 			  </tr>
 		    </table>		
 	  </div>
-	  <div class="w3-center"   >
+	 <div class="w3-center"   >
 		<input id="cameraLeftb" class="w3-btn  w3-blue w3-center " type="button" onclick="cameraLeft(this.id);return false;"  value="Open Camera">
 	  </div>
-	  <div class="w3-center"  style="width:100%;" >
-		  <table >
+	 <div class="w3-center"  style="width:100%;" >
+		 <table >
 			  <tr><th   colspan="6">Flight Mode</th></tr>
 			  <tr><td><input  type="checkbox" id="H_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Height Control</td></tr>
-			  <tr><td><input  type="checkbox" id="GPS_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">GPS </td></tr>
+			  <tr><td><input  type="checkbox" id="GPSControl" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">GPS </td></tr>
 			  <tr><td><input  type="checkbox" id="SerialEnabaled" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Serial Interace Enabaled</td></tr>
 			  <tr><td><input  type="checkbox" id="SerialActive" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Serial Interace Active</td></tr>
-			  <tr><td><input  type="checkbox" id="Emergency_Control" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Emergency</td></tr>	
+			  <tr><td><input  type="checkbox" id="EmergencyControl" onchange="SetFlightMode(this.checked);return false;" > </td><td align="left" colspan="5">Emergency</td></tr>
+			  <tr><td><input  type="checkbox" id="ManualControl" onchange="SetManualControl(this.checked);return false;" > </td><td align="left" colspan="5">Manual Control</td></tr>	
 		 </table>		 
 	 </div>
-	 
-	 <div class="w3-center"   >
+	 <div class="w3-center " style="margin-top: 5px;margin-bottom: 5px;"  >
+		<input id=""   type="button" onclick=""  value="Object detect" style="padding-left: 8px;padding-right: 8px;">
+		<input id=""   type="button" onclick=""  value="Hover on Ground" style="padding-left: 8px;padding-right: 8px;">
+		<input id=""   type="button" onclick=""  value="Optical Flow" style="padding-left: 8px;padding-right: 8px;">
+	 </div>
+	 <div class="w3-center"  style="margin-top: 5px;margin-bottom: 5px;" >
 		<input id=""   type="button" onclick=""  value="Object detect" style="padding-left: 8px;padding-right: 8px;">
 		<input id=""   type="button" onclick=""  value="Hover on Ground" style="padding-left: 8px;padding-right: 8px;">
 		<input id=""   type="button" onclick=""  value="Optical Flow" style="padding-left: 8px;padding-right: 8px;">
@@ -117,7 +98,7 @@ window.onload = function ()
    
    
   </div>
-  <div class="w3-third w3-border"  style="height:720px">  <!-----------HUD-------------->
+  <div class="w3-third w3-border"  style="height:760px">  <!-----------HUD-------------->
 	<div class="w3-center">  
 	  <p><strong>Heads Up Display.</strong></p>
 	  	   <div class="container" style="height: 350px; width:100%; ">
@@ -189,7 +170,7 @@ window.onload = function ()
 		  </tr>		 
 		</table>		 
 		</div>
-       <div class="w3-center" >
+       <div class="w3-center " style="margin-top: 40px;" >
 		   <div class="w3-center"  style="width:100%;" >
 			<input class="shouldDis" type="range"   id="pointsroll" min="-90" max="90" step="5"  value="0" onchange="changeRoll(this.id);return false;">
 		   </div>
@@ -209,7 +190,7 @@ window.onload = function ()
 	</form>
 	</div>
   </div>
-  <div class="w3-third w3-border"  style="height:720px">  <!--------right panned-------->
+  <div class="w3-third w3-border"  style="height:760px">  <!--------right panned-------->
 	  <div class="w3-center w3-black"  style="width:100%;height:400px;" >
 		  <p>Vertical Camera</p>
 		  <img id="cameraRight" src="./static/rightcam.jpg" class="w3-border" alt="Vertical Camera" style="width:100%; max-height: 350px;"> 
@@ -222,35 +203,48 @@ window.onload = function ()
 			  </tr>
 		    </table>		
 	  </div>
-	   <div class="w3-center"   >
+	  <div class="w3-center"   >
 		<input id="camerarightb" class="w3-btn  w3-blue w3-center " type="button" onclick="cameraRight(this.id);return false;"  value="Open Camera">
 	  </div>
-	  
+	  <!-----------move keys-------------->
 	<div class="w3-row" >
-		<div class="w3-col" style="width:20%">
+		<div class="w3-col" style="width:25%;">
 		    <span style="margin-top:20px;" >Battery:</span><span  id="batteryval">...</span><span >Trottle</span><span  id="Trottle">...</span>
-			<div class=" w3-center" style="margin-top:1px;">.
-				<input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:160px;z-index:32;background-image:linear-gradient(green, red);" id="batteryB"  value="" readonly="">  
-				<input type="button" style="border:1px #A9A9A9 solid;position:absolute;width:45px;height:155px;z-index:34;"  readonly="" onclick="move()"                id="battery" value="0%">
-				<input   type="range" style="border:1px #A9A9A9 solid;position:relative;left:40px;width:150px;top:50px;transform: rotate(270deg);" id="baasdtteryB"  value="cvxcvzxc" readonly="">
+			<br><br> 
+			<div  class="w3-center"  style="display:inline-block;margin:5px;"> 
+				<div        id="divhumid"         style="margin-left:13px;border:0px #A9A9A9 solid;width:40px;height:130px;z-index:32;background-image:linear-gradient(blue, yellow);"    >  
+					<input  id="humid"  onclick="move(this.id,'%')"style="border:0px #A9A9A9 solid;width:40px;height:125px;z-index:34;" type="button"  readonly=""  value="">				
+				</div>
  			</div>
-		</div>
-		
-		<div class="w3-col" style="width:80%">		
+			<input   type="range" style=" position:relative;top:-80px;margin-left: 40px;border:1px #A9A9A9 solid;width:130px;transform: rotate(270deg);" id="baasdtteryB"  value="0" readonly="">
+			
+		</div>		
+		<div class="w3-col" style="width:75%">	
+		  <span id="outputsend" style="margin-left: 100px;">xxxxxxxxxx:</span>
 		  <div class="w3-center" >
-			<button id="UP_ID"    type="buttom" onclick="Forward();return false;"  style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25B2;</button>
+		  
+			<button id="FMOVE"      type="buttom" onmousedown="omdMove('F');return false;" onmouseup="omuMove('F');return false;"   style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25B2;</button>
 		  </div>
 		  <div class="w3-center" >
-			<button id="Right_ID" type="buttom" onclick="go_left();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;margin-right: 10px;">&#x25C4;</button>
-			<input class="w3-button w3-circle w3-black w3-center" type="button" id="Buttonstop" onclick="Stop();return false;" name="" value="Stop" style="width:50px;height:50px; margin-top:-25px;padding-left:5px;" >                            
-			<button id="Right_ID" type="buttom" onclick="go_right();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25BA;</button>
+			<button id="RMOVE"      type="buttom" onmousedown="omdMove('L');return false;" onmouseup="omuMove('L');return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;margin-right: 10px;">&#x25C4;</button>
+			<input  id="Buttonstop" type="button" onclick="DroneStop();           return false;" name="" class="w3-button w3-circle w3-black w3-center"  value="Stop" style="width:50px;height:50px; margin-top:-25px;padding-left:5px;" >                            
+			<button id="LMOVE"      type="buttom" onmousedown="omdMove('R');return false;" onmouseup="omuMove('R');return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#x25BA;</button>
 		  </div>
 		  <div class="w3-center" >
-			<button id="Down_ID" type="buttom" onclick="Backword();return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#9660;</button>	      
+			<button id="BMOVE"      type="buttom" onmousedown="omdMove('B');return false;" onmouseup="omuMove('B');return false;" style="width:70px;height:70px;font-size:60px;border:0px #A9A9A9 solid;background-color:transparent;color:#00C024;font-weight:bold;">&#9660;</button>	      
 		  </div>
 	    </div>
 	</div>
-  </div>
+  
+	<div class="w3-center"   >
+		<input id=""   type="button" onclick=""  value="Object detect" style="padding-left: 8px;padding-right: 8px;">
+		<input id=""   type="button" onclick=""  value="Hover on Ground" style="padding-left: 8px;padding-right: 8px;">
+		<input id=""   type="button" onclick=""  value="Optical Flow" style="padding-left: 8px;padding-right: 8px;">
+	</div>
+  
+  </div>  
+   
+  
 <!-------------------------------------------------lower pannel -------------------------------------------------------->
   <div class=" w3-container w3-padding-24 w3-border ">
 	  <button onclick="clicktohide()" class=" w3-button w3-blue w3-block w3-card-4 ">Advanced Console     &     Google map</button>
@@ -417,4 +411,5 @@ This page is the web application of drone control panel. All autopilot data and 
 
 
 </body>
+
 </html>

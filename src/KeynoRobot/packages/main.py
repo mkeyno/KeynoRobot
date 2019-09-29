@@ -6,7 +6,7 @@ from queue           import Queue
 from aiohttp.web     import middleware
 from objbrowser      import browse
 from aiojobs.aiohttp import setup, spawn
-
+from concurrent.futures import ThreadPoolExecutor,ProcessPoolExecutor
 
 # logging.basicConfig(format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
 # logger = logging.getLogger('async')
@@ -18,8 +18,8 @@ INDEX_File=os.path.join(os.path.dirname(__file__), 'index.html'); logging.debug(
 LOGIN_File=os.path.join(os.path.dirname(__file__), 'login.html'); logging.debug(LOGIN_File)
 STATIC_DIR=os.path.join(os.path.dirname(__file__), 'static');logging.debug(STATIC_DIR)
 
-WSID=0
-GlobalAPP=GlobalWS=None
+PORT='COM3'
+GlobalAPP=_writer=None
 
 IsAucheticated = False
 VERBOSE_DEBUG = False
@@ -277,11 +277,13 @@ def parsing(data):
 async def websocket_handler(request):
 
 
+	global _writer
 	#logging.debug("this is another one= ",request.app["GlobalWS"])
 	if request.app["GlobalWS"] != None:
-		print("             return, this is more than one {} client ".format(GlobalWS))
+		print("             return, this is more than one  client:{} ".format(request.app["GlobalWS"]))
 		return
-	print('Websocket connection starting')
+	print('--------------------Websocket connection starting>>>>>>>>>>>>>>>>>>>')
+	
 
 	ws = web.WebSocketResponse()
 	await ws.prepare(request)
@@ -293,8 +295,9 @@ async def websocket_handler(request):
 			# this remain live
 			if msg.type == aiohttp.WSMsgType.TEXT:
 				Income=msg.data;
-				print(Income) 
-				await ws.send_str("send back message:")
+				if(_writer):
+					_writer.write(Income)
+				print(Income)
 		#check serial
 	#request.app["GlobalWS"]=None;#.remove(ws) 
 	finally:
@@ -313,18 +316,19 @@ async def index(request):
     return web.Response(text='<div><img src="/imageH"  /></div><p> video </p><div><img src="/imageV"  /></div>', content_type='text/html')
 
 async def handle_index_page(request):
-    print("IsAucheticated = ?")
-    global IsAucheticated
-    if not IsAucheticated:
-       print("IsAucheticated = False")
-       return await handle_login_page(request)
-    print("handle_index_page");
-    if VERBOSE_DEBUG:
-         str="index_page method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
-         logging.debug(str);print(str)#clientIP = request.headers['X-Forwarded-For']  #password = None " url=",request.app.router['login'].url_for());#  logging.debug(request.headers)  
-    async with aiofiles.open(INDEX_File, mode='r') as index_file:
-        index_contents = await index_file.read()
-    return web.Response(text=index_contents, content_type='text/html')
+	
+	global IsAucheticated
+	print(">>>>>>....IsAucheticated = ?",IsAucheticated)
+	if not IsAucheticated:
+		return await handle_login_page(request)
+	print("handle_index_page");
+	request.app["GlobalWS"] = None
+	if VERBOSE_DEBUG:
+		 str="index_page method={},host={},path={},headers={},transport={},cookies={}".format(request.method,request.host,request.path,request.headers,request.transport,request.cookies,)
+		 logging.debug(str);print(str)#clientIP = request.headers['X-Forwarded-For']  #password = None " url=",request.app.router['login'].url_for());#  logging.debug(request.headers)  
+	async with aiofiles.open(INDEX_File, mode='r') as index_file:
+		index_contents = await index_file.read()
+	return web.Response(text=index_contents, content_type='text/html')
 
 async def handle_login_page(request):
     #print("handle_login_page=",request.url_for());
