@@ -145,7 +145,7 @@ document.getElementById('airSp2').style.marginTop= v+"px";
 }
 function Disable1(){var x= document.querySelectorAll(".shouldDis");for (i = 0; i < x.length; i++)   x[i].style.visibility = 'hidden';}
 function Enable1() {var x= document.querySelectorAll(".shouldDis");for (i = 0; i < x.length; i++)   x[i].style.visibility = 'visible';} 		
-function send_command(){
+function send_raw_command(){
 	var v=document.getElementById("send_command_value").value;
 	if(v) _Connection.send(v )
 	document.getElementById("send_command_value").value="";

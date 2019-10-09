@@ -6,7 +6,7 @@ from  cli import *
 import exceptions
 import sys,os
 #import packages.winapp as winapp
-from  packages.main import server_begin
+from  packages.main import mainApp
 import packages.cam as cam
  
 def do_action(com):
@@ -14,10 +14,10 @@ def do_action(com):
     if   com=="win":        
         pass #winapp.main()
     elif com=="web":
-        print("web application loading");	server_begin()
+        print("web application loading");	mainApp()
     elif com=="cam":
         cam.main()    
-    else: print("web started");	server_begin()
+    else: print("web started");	            mainApp()
 
 parser = argparse.ArgumentParser(prog="KeynoRobot main command")	
 parser.add_argument("--version",action="version")

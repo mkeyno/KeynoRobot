@@ -11,7 +11,7 @@ long_description = (HERE / "README.md").read_text()
 
 setuptools.setup(
     name="KeynoRobot",
-    version='0.4.%s' % os.environ.get('TRAVIS_BUILD_NUMBER', 0),
+    version='0.5.%s' % os.environ.get('TRAVIS_BUILD_NUMBER', 0),
     author="Mehrdad Keyno",
     author_email="hrsk1980@gmail.com",
     description="This is a repository of code, project information and hardware-software design for AI Cognitive maps UAV drone",

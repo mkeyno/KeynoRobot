@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import logging,os,asyncio,cv2,aiojobs,aiofiles,json, threading,dotenv,argparse,aiohttp,aiohttp_session ,time,serial_asyncio
+import logging,os,asyncio,cv2,aiojobs,aiofiles,json, threading,dotenv,argparse,aiohttp,aiohttp_session ,time,serial,serial_asyncio,binascii
  
-from aiohttp         import web, MultipartWriter
-from queue           import Queue
-from aiohttp.web     import middleware
-#from objbrowser      import browse
-from aiojobs.aiohttp import setup, spawn
+from aiohttp            import web, MultipartWriter
+from queue              import Queue
+from aiohttp.web        import middleware
+#from objbrowser        import browse
+from aiojobs.aiohttp    import setup, spawn
 from concurrent.futures import ThreadPoolExecutor,ProcessPoolExecutor
-
+from functools          import wraps
 # logging.basicConfig(format="[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
 # logger = logging.getLogger('async')
 # logger.setLevel(logging.DEBUG)
@@ -18,9 +18,10 @@ INDEX_File=os.path.join(os.path.dirname(__file__), 'index.html'); logging.debug(
 LOGIN_File=os.path.join(os.path.dirname(__file__), 'login.html'); logging.debug(LOGIN_File)
 STATIC_DIR=os.path.join(os.path.dirname(__file__), 'static');logging.debug(STATIC_DIR)
 
-PORT='COM3'
-GlobalAPP=_writer=None
+PORT='COM7'#'/dev/ttyS0'
 
+GlobalAPP=_reader=_writer=comPort=None
+BAUDRATE=57600
 IsAucheticated = False
 VERBOSE_DEBUG = False
 DEFAULT_LOG_LEVEL = "INFO"
@@ -36,6 +37,14 @@ ALLOWED_LOG_LEVELS = (
     "DEBUG",
     "NOTSET",
 )
+
+def thread_decorator(func):
+	@wraps(func)
+	def thred_maker(*args,**kwargs):
+		t=threading.Thread(target=func,args=args,kwargs=kwargs)
+		t.start()
+		return t
+	return thred_maker
 
 def get_args():
     parser = argparse.ArgumentParser( description="Aiohttp based streaming service", )
@@ -277,21 +286,18 @@ def parsing(data):
 async def websocket_handler(request):
 
 
-	global _writer
+	
 	#logging.debug("this is another one= ",request.app["GlobalWS"])
 	if request.app["GlobalWS"] != None:
 		print("             return, this is more than one  client:{} ".format(request.app["GlobalWS"]))
 		return
 	print('--------------------Websocket connection starting>>>>>>>>>>>>>>>>>>>')
-	
-
 	ws = web.WebSocketResponse()
 	await ws.prepare(request)
 	request.app["GlobalWS"]=1000
 	logging.debug('------- -----Websocket connection ready------- -----')
 	request.app["websockets"].add(ws)
-	try:		
-		async for msg in ws:
+	async for msg in ws:
 			# this remain live
 			if msg.type == aiohttp.WSMsgType.TEXT:
 				Income=msg.data;
@@ -299,9 +305,8 @@ async def websocket_handler(request):
 					_writer.write(Income)
 				print(Income)
 		#check serial
-	#request.app["GlobalWS"]=None;#.remove(ws) 
-	finally:
-		request.app['websockets'].discard(ws)
+	request.app["GlobalWS"]=None;#.remove(ws) 
+	request.app['websockets'].discard(ws)
 	return ws
 	
 async def websockets_clear(app):
@@ -361,22 +366,58 @@ async def handle_authenticate(request):
 
 
 
-async def serialRead(f):
+async def serialWriteLoop(f):
+	global _writer
 	print("send serialRead")
+	message =b'>*>p0x0800'
 	while True:
-		print("sending......")
-		await send_ws("helo web site ")
+		print(b'>*>p0x0800')
+		if(_writer):
+			for b in message:
+				_writer.write(bytes([b]))
 		await asyncio.sleep(1/f);
 
+
+# message = b'foo\nbar\nbaz\nqux\n'
+        # for b in message:
+            # self.transport.serial.write(bytes([b]))
+            # print(f'Writer sent: {bytes([b])}')
+
+
 async def SerialReader(loop):
-		reader,writer = await serial_asyncio.open_serial_connection(url='COM3', baudrate=115200,loop=loop)
+		  global _reader,_writer
+		  _reader,_writer =  serial_asyncio.open_serial_connection(url=PORT, baudrate=BAUDRATE,loop=loop)
+		  
+		  print("_reader",_reader);print("_writer",_writer);print(b'>*>p0x0800')
+		  _writer.write(b'>*>p0x0800')
+		  while True:
+			  line = await _reader.readline();print( len(line))
+			  #line = line.decode("utf-8").strip()
+			  #print(bytes(line, 'utf-8'))
+			  for x in GlobalAPP['websockets']:                
+				  await x.send_str(line)
+
+def SerialReceiveThread():
+	print (comPort.is_open)
+	if comPort.is_open:
 		while True:
-			line = await reader.readline()
-			line = line.decode("utf-8").strip()
-			print(line)
-			for x in GlobalAPP['websockets']:                
-				await x.send_str(line)
-				
+			size = comPort.inWaiting()
+			if size:
+				data = comPort.read(size)
+				print (data)
+			else:
+				pass#print ('no data')
+			
+	else:
+		print ('comPort not open')
+
+def PeriodicWriteSerialThread(f=1):
+  while comPort:
+        print(b'>*>p0x0800')#pitch=0,roll=0,yaw=0,thrust=0
+        comPort.write(b'>*>p0x0800')#CTRL_INPUT(thrust=F_Tmap(Thrust)))
+        time.sleep(1/f)
+
+		
 async def setup_server(loop, address, port):
 	global GlobalAPP
 	GlobalAPP=app = web.Application(loop=loop)
@@ -406,7 +447,8 @@ async def setup_server(loop, address, port):
 
 def server_begin():
 	ip='0.0.0.0';port=8080
-	loop = asyncio.new_event_loop();print("server_begin",loop)	#get_event_loop get_running_loop
+	loop = asyncio.new_event_loop();
+	print("[server_begin]",loop)	#get_event_loop get_running_loop
 	asyncio.set_event_loop(loop)
 	asyncio.run_coroutine_threadsafe(setup_server(loop, ip,port ), loop)
 	#asyncio.run_coroutine_threadsafe(SerialReader(loop) , loop)
@@ -419,18 +461,41 @@ def server_begin():
 		loop.close()
 
 def setup_serial():
-	loop = asyncio.new_event_loop();print("setup_serial",loop)	#get_event_loop get_running_loop
+	loop = asyncio.new_event_loop();
 	asyncio.set_event_loop(loop)
-	loop.run_until_complete(SerialReader(loop))
+	
+	loop.run_until_complete(asyncio.gather(SerialReader(loop),serialWriteLoop(1)))
+	#loop.run_until_complete(SerialReader(loop))
 	loop.run_forever() 
 
+def mainApp():
+	global comPort
+	try:
+		comPort = serial.Serial(port=PORT,baudrate=BAUDRATE,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
+		comPort.timeout =.1
+		print(sys.getsizeof(comPort))
+	except :
+		print("port already open")
+		
+	threading.Thread(target=SerialReceiveThread).start()
+	threading.Thread(target=PeriodicWriteSerialThread,args=(20,)).start()
+	#threading.Thread(target=readInputThread).start()
+	threading.Thread(target = server_begin ).start()
+	#threading.Thread(target = setup_serial ).start()
 
-if __name__ == '__main__':
+    
+    #serial_threads.join() 
+    #main_threads.join() ; 
 
-	main_threads =    threading.Thread(target = server_begin )
-	serial_threads =  threading.Thread(target = setup_serial )
-	main_threads.start() ;	serial_threads.start() ;
-	main_threads.join() ;serial_threads.join()  
+if __name__ == '__main__':	
+	try:
+		mainApp()
+	except KeyboardInterrupt:
+		print('Interrupted')
+			# try:
+				# sys.exit(0)
+			# except SystemExit:
+				# os._exit(0)
 	
 	
 """
