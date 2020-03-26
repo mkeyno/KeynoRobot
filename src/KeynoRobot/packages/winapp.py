@@ -41,6 +41,28 @@ roi_w,roi_h=70,110
 ROI_L=ROI_R=template=np.zeros((roi_h,roi_w), np.uint8)
 comparison_methods = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR','cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF_NORMED']
 
+class objectDetection():
+	def __init__(self, 	weights,config):
+		self.weights=weights
+		self.config=config
+		self.tensorflowNet = cv2.dnn.readNetFromTensorflow(self.weights,self.config)
+		
+	def detect(self,image):
+		rows, cols, channels = image.shape
+		self.tensorflowNet.setInput(cv2.dnn.blobFromImage(image, size=(300, 300), swapRB=True, crop=False))
+		networkOutput = self.tensorflowNet.forward()
+		for detection in networkOutput[0,0]:			
+			score = float(detection[2])
+			if score > 0.2:				
+				left = detection[3] * cols
+				top = detection[4] * rows
+				right = detection[5] * cols
+				bottom = detection[6] * rows
+				cv2.rectangle(image, (int(left), int(top)), (int(right), int(bottom)), (0, 0, 255), thickness=2)
+		return image
+
+#OD=objectDetection('frozen_inference_graph.pb', 'graph.pbtxt')
+ 
 def findComonImage(image,whichOne,method=0):
 	global template
 	if whichOne=='R':
@@ -53,7 +75,7 @@ def findComonImage(image,whichOne,method=0):
 		#image[W_FRAME-roi_w:W_FRAME ,0:roi_h]=ROI_R
 	#w,h=template.shape[:,:,-1]
 	cm= values['comparison_methods']
-	#print(cm)
+	print(cm)
 	res = cv2.matchTemplate(image,template,eval(cm))
 	#threshold=.8#values['thresh_slider']
 	#print(threshold)

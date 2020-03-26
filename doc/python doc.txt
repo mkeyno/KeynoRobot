@@ -14,11 +14,19 @@ sudo update-rc.d sample.py defaults
 
 sudo nano /lib/systemd/system/firefly.service
 sudo nano /home/pi/.bashrc
-sudo nano /etc/rc.local
+sudo nano /etc/rc.local  adding the following lines just before the final “exit 0” line:
 sudo nano /etc/profile
 /usr/bin/python3  /home/pi/github/KeynoRobot/src/KeynoRobot/__main__.py &
 
-
+(
+date
+echo $PATH
+PATH=$PATH:/bin:/sbin:/usr/bin:/usr/local/bin
+export PATH
+cd /home/pi
+screen -d -m -s /bin/bash mavproxy.py --master=/dev/ttyAMA0 --baudrate 57600 --aircraft MyCopter
+) > /tmp/rc.log 2>&1
+exit 0
 pip-review --local --interactive
 
 python setup.py sdist
@@ -69,10 +77,10 @@ sudo raspi-config
 1f809f5d6cb379568bc960a377d7a16e347355d5
  Types of learning algorithms
 
-4.1.1 Supervised learning
-4.1.2 Unsupervised learning
-4.1.3 Reinforcement learning
-4.1.4 Feature learning
+4.1.1 Supervised        learning
+4.1.2 Unsupervised      learning
+4.1.3 Reinforcement     learning
+4.1.4 Feature           learning
 4.1.5 Sparse dictionary learning
 4.1.6 Anomaly detection
 4.1.7 Association rules
@@ -359,216 +367,24 @@ setup(
     },
 )
 
-[Pp]ython   Match "Python" or "python"
-rub[ye]     Match "ruby" or "rube"
-[aeiou]     Match any one lowercase vowel
-[0-9]       Match any digit; same as [0123456789]
-[a-z]       Match any lowercase ASCII letter
-[A-Z]       Match any uppercase ASCII letter
-[a-zA-Z0-9] Match any of the above
-[^aeiou]    Match anything other than a lowercase vowel
-9 	
-
-[^0-9]
-
-Match anything other than a digit
-Special Character Classes
-Sr.No. 	Example & Description
-1 	
-
-.
-
-Match any character except newline
-2 	
-
-\d
-
-Match a digit: [0-9]
-3 	
-
-\D
-
-Match a nondigit: [^0-9]
-4 	
-
-\s
-
-Match a whitespace character: [ \t\r\n\f]
-5 	
-
-\S
-
-Match nonwhitespace: [^ \t\r\n\f]
-6 	
-
-\w
-
-Match a single word character: [A-Za-z0-9_]
-7 	
-
-\W
-
-Match a nonword character: [^A-Za-z0-9_]
-Repetition Cases
-Sr.No. 	Example & Description
-1 	
-
-ruby?
-
-Match "rub" or "ruby": the y is optional
-2 	
-
-ruby*
-
-Match "rub" plus 0 or more ys
-3 	
-
-ruby+
-
-Match "rub" plus 1 or more ys
-4 	
-
-\d{3}
-
-Match exactly 3 digits
-5 	
-
-\d{3,}
-
-Match 3 or more digits
-6 	
-
-\d{3,5}
-
-Match 3, 4, or 5 digits
-Nongreedy repetition
-
-This matches the smallest number of repetitions −
-Sr.No. 	Example & Description
-1 	
-
-<.*>
-
-Greedy repetition: matches "<python>perl>"
-2 	
-
-<.*?>
-
-Nongreedy: matches "<python>" in "<python>perl>"
-Grouping with Parentheses
-Sr.No. 	Example & Description
-1 	
-
-\D\d+
-
-No group: + repeats \d
-2 	
-
-(\D\d)+
-
-Grouped: + repeats \D\d pair
-3 	
-
-([Pp]ython(, )?)+
-
-Match "Python", "Python, python, python", etc.
-Backreferences
-
-This matches a previously matched group again −
-Sr.No. 	Example & Description
-1 	
-
-([Pp])ython&\1ails
-
-Match python&pails or Python&Pails
-2 	
-
-(['"])[^\1]*\1
-
-Single or double-quoted string. \1 matches whatever the 1st group matched. \2 matches whatever the 2nd group matched, etc.
-Alternatives
-Sr.No. 	Example & Description
-1 	
-
-python|perl
-
-Match "python" or "perl"
-2 	
-
-rub(y|le))
-
-Match "ruby" or "ruble"
-3 	
-
-Python(!+|\?)
-
-"Python" followed by one or more ! or one ?
-Anchors
-
-This needs to specify match position.
-Sr.No. 	Example & Description
-1 	
-
-^Python
-
-Match "Python" at the start of a string or internal line
-2 	
-
-Python$
-
-Match "Python" at the end of a string or line
-3 	
-
-\APython
-
-Match "Python" at the start of a string
-4 	
-
-Python\Z
-
-Match "Python" at the end of a string
-5 	
-
-\bPython\b
-
-Match "Python" at a word boundary
-6 	
-
-\brub\B
-
-\B is nonword boundary: match "rub" in "rube" and "ruby" but not alone
-7 	
-
-Python(?=!)
-
-Match "Python", if followed by an exclamation point.
-8 	
-
-Python(?!!)
-
-Match "Python", if not followed by an exclamation point.
-Special Syntax with Parentheses
-Sr.No. 	Example & Description
-1 	
-
-R(?#comment)
-
-Matches "R". All the rest is a comment
-2 	
-
-R(?i)uby
-
-Case-insensitive while matching "uby"
-3 	
-
-R(?i:uby)
-
-Same as above
-4 	
-
-rub(?:y|le))
-
-Group only without creating \1 backreference
-
-
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Base64_Image_Encoder.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_All_Widgets.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\ProgrammingClassExamples\Win10 versions\9c PSG Tabs example plus.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\ProgrammingClassExamples\Win10 versions\9a PSG Windows(location hide).py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\ProgrammingClassExamples\Win10 versions\5a PSG (listboxes add remove).py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\ProgrammingClassExamples\MacOS versions\3 PSG (multiline display).py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Multithreaded_Queued.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Multithreaded_Long_Tasks.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Multithreaded_Logging.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Keyboard.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Graph_Element_Sine_Wave.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Font_Previewer.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Fill_Form.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Tree_Element.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Threaded_Work.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\exemaker\pysimplegui-exemaker\pysimplegui-exemaker.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Desktop_Floating_Toolbar.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_PSG_SDK_Quick_Ref.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Tabs_Nested.py
+F:\Github\pthon download\PySimpleGUI-master\PySimpleGUI-master\DemoPrograms\Demo_Crossword_Puzzle.py
 
